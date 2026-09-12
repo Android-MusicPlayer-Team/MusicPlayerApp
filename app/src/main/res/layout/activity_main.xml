@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 音乐播放器主界面（深色现代风格） -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/bg_main">
+
+    <!-- 顶部：封面 + 歌曲信息（居中） -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- 圆形封面占位 -->
+        <TextView
+            android:id="@+id/tvCover"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@drawable/bg_cover"
+            android:gravity="center"
+            android:text="♪"
+            android:textColor="#FFFFFF"
+            android:textSize="40sp" />
+
+        <!-- 歌名 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:ellipsize="marquee"
+            android:gravity="center"
+            android:maxLines="1"
+            android:text="暂无歌曲"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- 歌手 -->
+        <TextView
+            android:id="@+id/tvArtist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:text="--"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- 歌词显示区域（可选功能） -->
+    <TextView
+        android:id="@+id/tvLyric"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:minHeight="40dp"
+        android:text="暂无歌词（点此开启文件访问）"
+        android:textColor="#FFB9B1FF"
+        android:textSize="15sp" />
+
+    <!-- 播放进度条 -->
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:max="1000"
+        android:progress="0"
+        android:progressBackgroundTint="@color/track_gray"
+        android:progressTint="@color/theme_purple"
+        android:thumbTint="@color/theme_purple" />
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="00:00 / 00:00"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <!-- 控制按钮区：倒退 上一首 播放/暂停 下一首 快进 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnRewind"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_circle"
+            android:contentDescription="倒退10秒"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_media_rew"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/btnPrev"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_circle"
+            android:contentDescription="上一首"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/btnPlay"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginHorizontal="10dp"
+            android:background="@drawable/btn_play_circle"
+            android:contentDescription="播放或暂停"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_media_play"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/btnNext"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_circle"
+            android:contentDescription="下一首"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/btnForward"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/btn_circle"
+            android:contentDescription="快进10秒"
+            android:scaleType="centerInside"
+            android:src="@android:drawable/ic_media_ff"
+            android:tint="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- 播放模式按钮（胶囊样式） -->
+    <Button
+        android:id="@+id/btnMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_mode_btn"
+        android:text="模式：顺序循环"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp" />
+
+    <!-- 倍速播放下拉选择器 -->
+    <Spinner
+        android:id="@+id/spinnerSpeed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_mode_btn"
+        android:paddingVertical="1dp"
+        android:paddingHorizontal="12dp"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:popupBackground="@drawable/bg_speed_dropdown"
+        android:gravity="center" />
+
+    <!-- 今日推荐卡片：每天自动推荐一首歌，点击直接播放 -->
+    <LinearLayout
+        android:id="@+id/llDaily"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/item_song_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- "今日推荐"小标签 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_mode_btn"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="今日推荐"
+            android:textColor="@color/theme_purple"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- 推荐歌曲名 + 歌手 -->
+        <TextView
+            android:id="@+id/tvDailySong"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="扫描完成后显示今天的推荐歌曲"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- 歌曲列表（占据剩余空间） -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="14dp"
+        android:layout_weight="1"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="8dp"
+        android:listSelector="@android:color/transparent" />
+
+</LinearLayout>
