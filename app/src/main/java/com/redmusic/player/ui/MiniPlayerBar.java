@@ -19,7 +19,7 @@ import com.redmusic.player.player.PlayerHolder;
 public class MiniPlayerBar extends LinearLayout {
     private ImageView cover;
     private TextView title, artist;
-    private ImageButton playBtn;
+    private ImageButton playBtn, playlistBtn;
 
     public MiniPlayerBar(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -30,6 +30,8 @@ public class MiniPlayerBar extends LinearLayout {
         artist = findViewById(R.id.mini_artist);
         playBtn = findViewById(R.id.mini_play);
         playBtn.setOnClickListener(v -> PlayerHolder.get().playPause());
+        playlistBtn = findViewById(R.id.mini_playlist);
+        playlistBtn.setOnClickListener(v -> new PlaylistDialog(getContext()).show());
     }
 
     public void refresh() {

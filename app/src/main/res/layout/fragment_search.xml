@@ -40,6 +40,18 @@
             android:contentDescription="搜索" />
     </LinearLayout>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/suggest_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="4dp"
+        android:background="#1F1F1F"
+        android:visibility="gone"
+        android:maxHeight="320dp"
+        android:clipToPadding="false" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

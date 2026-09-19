@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat;
 import androidx.palette.graphics.Palette;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
@@ -56,10 +57,10 @@ public class PlayerActivity extends AppCompatActivity {
     };
 
     private ImageView cover, bgBlur;
-    private View bgGradient;
-    private TextView title, artist, curTime, totalTime, lyricLine, speedBtn, timerBtn, lyricToggle;
+    private View bgGradient, cdContainer;
+    private TextView title, artist, curTime, totalTime, fullTime, lyricLine, speedBtn, timerBtn, lyricToggle;
     private SeekBar seekBar;
-    private ImageButton shuffleBtn, prevBtn, playBtn, nextBtn, repeatBtn, favBtn;
+    private ImageButton shuffleBtn, prevBtn, playBtn, nextBtn, repeatBtn, favBtn, modeBtn, playlistBtn;
     private LyricView lyricView;
     private SpectrumView spectrum;
     private ObjectAnimator rotateAnim;
@@ -79,6 +80,7 @@ public class PlayerActivity extends AppCompatActivity {
         }
     };
     private long sleepAt = 0;
+    private boolean endWarned = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,17 +90,19 @@ public class PlayerActivity extends AppCompatActivity {
         cover = findViewById(R.id.player_cover);
         bgBlur = findViewById(R.id.player_bg_blur);
         bgGradient = findViewById(R.id.player_bg_gradient);
+        cdContainer = findViewById(R.id.player_cd_container);
         title = findViewById(R.id.player_title);
         artist = findViewById(R.id.player_artist);
         curTime = findViewById(R.id.player_cur_time);
         totalTime = findViewById(R.id.player_total_time);
+        fullTime = findViewById(R.id.player_full_time);
         lyricLine = findViewById(R.id.player_lyric_line);
         seekBar = findViewById(R.id.player_seek);
-        shuffleBtn = findViewById(R.id.player_shuffle);
+        shuffleBtn = findViewById(R.id.player_mode);
         prevBtn = findViewById(R.id.player_prev);
         playBtn = findViewById(R.id.player_play);
         nextBtn = findViewById(R.id.player_next);
-        repeatBtn = findViewById(R.id.player_repeat);
+        repeatBtn = findViewById(R.id.player_playlist);
         favBtn = findViewById(R.id.player_fav);
         speedBtn = findViewById(R.id.player_speed);
         timerBtn = findViewById(R.id.player_timer);
@@ -130,17 +134,17 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
         shuffleBtn.setOnClickListener(v -> {
-            PlayerHolder.get().toggleShuffle();
+            PlayerHolder.get().cycleMode();
+            int m = PlayerHolder.get().getPlayMode();
+            String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序播放"
+                    : m == PlayerHolder.MODE_ONE ? "单曲循环" : "随机播放";
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
             refreshControls();
-            Toast.makeText(this, PlayerHolder.get().isShuffle() ? "已开启随机播放" : "已关闭随机播放", Toast.LENGTH_SHORT).show();
         });
         prevBtn.setOnClickListener(v -> PlayerHolder.get().prev());
         playBtn.setOnClickListener(v -> PlayerHolder.get().playPause());
         nextBtn.setOnClickListener(v -> PlayerHolder.get().next(false));
-        repeatBtn.setOnClickListener(v -> {
-            PlayerHolder.get().cycleRepeat();
-            refreshControls();
-        });
+        repeatBtn.setOnClickListener(v -> new PlaylistDialog(this).show());
         favBtn.setOnClickListener(v -> {
             Track t = PlayerHolder.get().currentTrack();
             if (t == null) return;
@@ -164,12 +168,14 @@ public class PlayerActivity extends AppCompatActivity {
             lyricView.setFullScreen(fs);
             if (fs) {
                 cover.setVisibility(View.INVISIBLE);
+                cdContainer.setVisibility(View.INVISIBLE);
                 spectrum.setVisibility(View.INVISIBLE);
                 lyricLine.setVisibility(View.GONE);
                 lyricView.setVisibility(View.VISIBLE);
                 lyricToggle.setText("封面");
             } else {
                 cover.setVisibility(View.VISIBLE);
+                cdContainer.setVisibility(View.VISIBLE);
                 spectrum.setVisibility(View.VISIBLE);
                 lyricLine.setVisibility(View.VISIBLE);
                 lyricView.setVisibility(View.GONE);
@@ -286,10 +292,11 @@ public class PlayerActivity extends AppCompatActivity {
         }
         title.setText(t.displayTitle());
         artist.setText(t.displayArtist() + (t.album != null && !t.album.isEmpty() ? " · " + t.album : ""));
+        endWarned = false;
         if (t.artworkUrl != null && !t.artworkUrl.isEmpty()) {
             RequestOptions opts = new RequestOptions()
                     .placeholder(R.drawable.ic_music_note)
-                    .transform(new RoundedCorners(dp(28)));
+                    .transform(new CircleCrop());
             Glide.with(this).load(t.artworkUrl).apply(opts).into(cover);
             Glide.with(this).load(t.artworkUrl)
                     .into(new CustomTarget<android.graphics.drawable.Drawable>() {
@@ -338,10 +345,10 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void applyBg(int color) {
+        // 柔和深色渐变，不用封面模糊水印
         GradientDrawable gd = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.argb(230, Color.red(color), Color.green(color), Color.blue(color)),
-                        0xFF111111});
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{0xFF2B2F3A, 0xFF1A1A22});
         gd.setCornerRadius(0);
         bgGradient.setBackground(gd);
     }
@@ -355,29 +362,49 @@ public class PlayerActivity extends AppCompatActivity {
     private void refreshControls() {
         PlayerHolder ph = PlayerHolder.get();
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        shuffleBtn.setImageResource(ph.isShuffle() ? R.drawable.ic_shuffle_on : R.drawable.ic_shuffle);
-        int rm = ph.getRepeatMode();
-        repeatBtn.setImageResource(rm == 1 ? R.drawable.ic_repeat_one : R.drawable.ic_repeat);
-        repeatBtn.setColorFilter(rm == 0 ? 0xFF888888 : 0xFFC20C0C);
-        shuffleBtn.setColorFilter(ph.isShuffle() ? 0xFFC20C0C : 0xFF888888);
+        int m = ph.getPlayMode();
+        if (m == PlayerHolder.MODE_ONE) {
+            shuffleBtn.setImageResource(R.drawable.ic_repeat_one);
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
+        } else if (m == PlayerHolder.MODE_SHUFFLE) {
+            shuffleBtn.setImageResource(R.drawable.ic_shuffle);
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
+        } else {
+            shuffleBtn.setImageResource(R.drawable.ic_repeat);
+            shuffleBtn.setColorFilter(0xFFAAAAAA);
+        }
+        repeatBtn.setImageResource(R.drawable.ic_playlist);
+        repeatBtn.setColorFilter(0xFFDDDDDD);
     }
 
     private void updateProgress() {
         PlayerHolder ph = PlayerHolder.get();
         long pos = ph.getPosition();
         long dur = ph.getDuration();
+        Track t = ph.currentTrack();
         if (dur <= 0) {
             seekBar.setMax(1000);
             seekBar.setProgress(0);
             curTime.setText(fmt(pos));
             totalTime.setText("--:--");
+            fullTime.setText("");
         } else {
             seekBar.setMax((int) dur);
             seekBar.setProgress((int) pos);
             curTime.setText(fmt(pos));
             totalTime.setText(fmt(dur));
+            // 完整时长明显长于试听流 → 这是 iTunes 试听片段
+            if (t != null && t.durationMs > dur + 10000) {
+                fullTime.setText("试听 · 全长 " + fmt(t.durationMs));
+                // 试听剩余 <3 秒时提醒一次
+                if (!endWarned && ph.isPlaying() && dur - pos < 3000 && pos > 0) {
+                    endWarned = true;
+                    Toast.makeText(this, "试听片段即将结束，将自动切下一首", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                fullTime.setText("");
+            }
         }
-        Track t = ph.currentTrack();
         lyricView.updatePosition(pos);
         // 当前歌词行显示
         if (t != null && currentLines != null && !currentLines.isEmpty()) {

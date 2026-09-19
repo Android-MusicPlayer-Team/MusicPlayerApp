@@ -19,15 +19,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class PlayerHolder {
     private static PlayerHolder sInstance;
 
+    /** 播放模式：0=顺序循环队列，1=单曲循环，2=随机播放 */
+    public static final int MODE_SEQUENCE = 0;
+    public static final int MODE_ONE = 1;
+    public static final int MODE_SHUFFLE = 2;
+
     private final ExoPlayer player;
     private final Handler main = new Handler(Looper.getMainLooper());
     private final List<Track> queue = new ArrayList<>();
     private final List<Runnable> listeners = new CopyOnWriteArrayList<>();
 
     private int index = -1;
-    private boolean shuffle = false;
+    private int playMode = MODE_SEQUENCE;
     private List<Integer> shuffleOrder = new ArrayList<>();
-    private int repeatMode = Player.REPEAT_MODE_OFF;
     private float speed = 1f;
 
     public static synchronized void init(Context ctx) {
@@ -69,7 +73,7 @@ public class PlayerHolder {
     }
 
     private void onTrackEnded() {
-        if (repeatMode == Player.REPEAT_MODE_ONE) {
+        if (playMode == MODE_ONE) {
             player.seekTo(0);
             player.play();
         } else {
@@ -80,7 +84,7 @@ public class PlayerHolder {
     public void playQueue(List<Track> tracks, int startIndex) {
         queue.clear();
         queue.addAll(tracks);
-        index = Math.max(0, startIndex);
+        index = Math.max(0, Math.min(startIndex, queue.size() - 1));
         buildShuffleOrder();
         loadCurrent();
         player.play();
@@ -95,9 +99,10 @@ public class PlayerHolder {
         Collections.shuffle(shuffleOrder);
     }
 
+    /** index（逻辑位）→ 队列实际下标 */
     private int actualIndex() {
         if (index < 0 || index >= queue.size()) return index;
-        if (shuffle && index < shuffleOrder.size()) {
+        if (playMode == MODE_SHUFFLE && index < shuffleOrder.size()) {
             return shuffleOrder.get(index);
         }
         return index;
@@ -127,31 +132,21 @@ public class PlayerHolder {
 
     public void next(boolean auto) {
         if (queue.isEmpty()) return;
-        if (shuffle) {
+        int nextIdx;
+        if (playMode == MODE_SHUFFLE) {
             if (index + 1 < shuffleOrder.size()) {
-                index++;
-            } else if (repeatMode == Player.REPEAT_MODE_ALL) {
-                index = 0;
+                nextIdx = index + 1;
             } else {
-                if (auto) {
-                    stopAndClear();
-                    return;
-                }
-                index = 0;
+                nextIdx = 0; // 随机队列播完自动重新洗牌重头来
             }
         } else {
             if (index + 1 < queue.size()) {
-                index++;
-            } else if (repeatMode == Player.REPEAT_MODE_ALL) {
-                index = 0;
+                nextIdx = index + 1;
             } else {
-                if (auto) {
-                    stopAndClear();
-                    return;
-                }
-                index = 0;
+                nextIdx = 0; // 顺序播完循环队列
             }
         }
+        index = nextIdx;
         loadCurrent();
         player.play();
         notifyChanged();
@@ -166,16 +161,64 @@ public class PlayerHolder {
         if (index > 0) {
             index--;
         } else {
-            index = 0;
+            index = queue.size() - 1;
         }
         loadCurrent();
         player.play();
         notifyChanged();
     }
 
-    private void stopAndClear() {
-        index = -1;
-        player.stop();
+    /** 点击队列中某首歌切过去 */
+    public void playAt(int posInQueue) {
+        if (queue.isEmpty() || posInQueue < 0 || posInQueue >= queue.size()) return;
+        // 随机模式下 posInQueue 是 queue 下标，需要换算成 shuffleOrder 位置
+        if (playMode == MODE_SHUFFLE) {
+            int p = shuffleOrder.indexOf(posInQueue);
+            if (p >= 0) index = p;
+        } else {
+            index = posInQueue;
+        }
+        loadCurrent();
+        player.play();
+        notifyChanged();
+    }
+
+    /** 队列列表（给 UI 展示） */
+    public List<Track> getQueue() {
+        return new ArrayList<>(queue);
+    }
+
+    /** 当前在队列中的位置（UI 高亮用） */
+    public int getQueuePosition() {
+        return actualIndex();
+    }
+
+    /** 删除队列里第 pos 首，返回删除后是否还在播放 */
+    public void removeAt(int pos) {
+        if (pos < 0 || pos >= queue.size()) return;
+        queue.remove(pos);
+        if (playMode == MODE_SHUFFLE) {
+            int p = shuffleOrder.indexOf(pos);
+            if (p >= 0) shuffleOrder.remove(p);
+            else buildShuffleOrder();
+            // 重建 shuffleOrder 的值映射
+            List<Integer> rebuilt = new ArrayList<>();
+            for (int i = 0; i < queue.size(); i++) rebuilt.add(i);
+            Collections.shuffle(rebuilt);
+            shuffleOrder = rebuilt;
+        }
+        int curActual = actualIndex();
+        if (queue.isEmpty()) {
+            index = -1;
+            player.stop();
+        } else if (pos < curActual) {
+            index--;
+        } else if (pos == curActual) {
+            // 删了正在放的，播下一首
+            if (index >= queue.size()) index = 0;
+            loadCurrent();
+            player.play();
+        }
         notifyChanged();
     }
 
@@ -183,23 +226,16 @@ public class PlayerHolder {
         player.seekTo(ms);
     }
 
-    public void toggleShuffle() {
-        shuffle = !shuffle;
-        if (shuffle) {
+    /** 循环切换：顺序循环 → 单曲循环 → 随机播放 */
+    public void cycleMode() {
+        playMode = (playMode + 1) % 3;
+        if (playMode == MODE_SHUFFLE) {
             int cur = actualIndex();
             buildShuffleOrder();
-            // 让当前歌曲保持在播放位置附近
             int pos = shuffleOrder.indexOf(cur);
-            if (pos > 0) {
-                Collections.swap(shuffleOrder, 0, pos);
-            }
+            if (pos > 0) Collections.swap(shuffleOrder, 0, pos);
+            index = 0;
         }
-        notifyChanged();
-    }
-
-    public void cycleRepeat() {
-        repeatMode = (repeatMode + 1) % 3;
-        player.setRepeatMode(repeatMode);
         notifyChanged();
     }
 
@@ -213,12 +249,8 @@ public class PlayerHolder {
         return speed;
     }
 
-    public int getRepeatMode() {
-        return repeatMode;
-    }
-
-    public boolean isShuffle() {
-        return shuffle;
+    public int getPlayMode() {
+        return playMode;
     }
 
     public boolean isPlaying() {

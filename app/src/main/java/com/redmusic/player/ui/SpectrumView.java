@@ -32,9 +32,9 @@ public class SpectrumView extends View {
 
     public SpectrumView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        barPaint.setShader(new LinearGradient(0, 0, 0, dp(80),
-                0xFFC20C0C, 0xFFFF6B6B, Shader.TileMode.CLAMP));
-        levels = new float[32];
+        barPaint.setShader(new LinearGradient(0, 0, 0, dp(36),
+                0x80FFFFFF, 0x22FFFFFF, Shader.TileMode.CLAMP));
+        levels = new float[48];
     }
 
     private float dp(float v) {
@@ -83,14 +83,14 @@ public class SpectrumView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         int barCount = levels.length;
-        float gap = dp(3);
+        float gap = dp(4);
         float barWidth = (getWidth() - gap * (barCount - 1)) / (float) barCount;
-        float maxH = getHeight();
+        float maxH = getHeight() * 0.9f;
         for (int i = 0; i < barCount; i++) {
-            float h = Math.max(dp(3), levels[i] * maxH);
+            float h = Math.max(dp(2), levels[i] * maxH);
             float left = i * (barWidth + gap);
             float right = left + barWidth;
-            canvas.drawRoundRect(left, getHeight() - h, right, getHeight(), dp(2), dp(2), barPaint);
+            canvas.drawRoundRect(left, getHeight() - h, right, getHeight(), dp(1), dp(1), barPaint);
         }
     }
 }

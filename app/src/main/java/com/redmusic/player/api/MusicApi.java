@@ -29,6 +29,41 @@ public class MusicApi {
         void onError(String msg);
     }
 
+    public interface SuggestCallback {
+        void onResult(List<String> words);
+    }
+
+    /** 输入时实时联想词（百度 suggestion 接口，无需鉴权） */
+    public static void suggest(String keyword, SuggestCallback cb) {
+        String url = "https://suggestion.baidu.com/su?wd=" + Uri.encode(keyword.trim()) + "&p=3&cb=";
+        ApiClient.get(url, new ApiClient.Callback() {
+            @Override
+            public void onResult(String body) {
+                List<String> words = new ArrayList<>();
+                try {
+                    // 返回形如 ( {q:"jay",p:false,s:["a","b",...]} );  非标准 JSON，用正则提取 s 数组
+                    java.util.regex.Matcher m = java.util.regex.Pattern
+                            .compile("s:\\[([^\\]]*)\\]").matcher(body);
+                    if (m.find()) {
+                        String arr = m.group(1);
+                        java.util.regex.Matcher sm = java.util.regex.Pattern
+                                .compile("\"([^\"]*)\"").matcher(arr);
+                        while (sm.find()) {
+                            if (!sm.group(1).isEmpty()) words.add(sm.group(1));
+                        }
+                    }
+                } catch (Exception ignored) {
+                }
+                cb.onResult(words);
+            }
+
+            @Override
+            public void onError(String msg) {
+                cb.onResult(new ArrayList<>());
+            }
+        });
+    }
+
     /** iTunes 关键词搜索 */
     public static void search(String term, TrackListCallback cb) {
         String url = ITUNES_SEARCH + Uri.encode(term.trim());

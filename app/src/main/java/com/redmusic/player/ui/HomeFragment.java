@@ -48,6 +48,12 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFav(Track t) {
+                Prefs.toggleFav(t);
+                Toast.makeText(requireContext(),
+                        Prefs.isFav(t) ? "已收藏 ♡" : "已取消收藏",
+                        Toast.LENGTH_SHORT).show();
+                int p = adapter.getTracks().indexOf(t);
+                if (p >= 0) adapter.notifyItemChanged(p);
             }
         });
         RecyclerView list = view.findViewById(R.id.home_list);

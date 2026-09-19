@@ -16,6 +16,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.redmusic.player.R;
 import com.redmusic.player.model.Track;
+import com.redmusic.player.util.Prefs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,8 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
             h.fav.setImageResource(R.drawable.ic_heart_filled);
         } else {
             h.fav.setVisibility(View.VISIBLE);
-            h.fav.setImageResource(R.drawable.ic_heart);
+            boolean isFav = Prefs.isFav(t);
+            h.fav.setImageResource(isFav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
         }
         h.fav.setColorFilter(0xFFC20C0C);
         h.itemView.setOnClickListener(v -> {
