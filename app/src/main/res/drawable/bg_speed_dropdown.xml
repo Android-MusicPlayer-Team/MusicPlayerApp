@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 颜色：和播放器主背景保持一致，这里用你界面的深紫色 -->
-    <solid android:color="#382E66"/>
-    <!-- 圆角大小，调大一点更美观 -->
-    <corners android:radius="16dp"/>
-    <!-- 内边距，给文字留出空间 -->
-    <padding android:paddingTop="8dp" android:paddingBottom="8dp"/>
-</shape>

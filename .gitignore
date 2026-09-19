@@ -1,17 +1,28 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle
+.gradle/
+build/
+app/build/
+
+# 本地配置（含本机 SDK 路径，不应入库）
 local.properties
 
-.kotlin/
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# 签名密钥（绝不能上传）
+keystore/
+
+# 构建产物
+*.apk
+*.aab
+*.idsig
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+captures/

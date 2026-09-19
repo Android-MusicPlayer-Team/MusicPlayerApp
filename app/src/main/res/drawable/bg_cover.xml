@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 歌曲封面圆形占位背景 -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <gradient
-        android:angle="45"
-        android:startColor="#FF8A7CFF"
-        android:endColor="#FFFF6B9D" />
-</shape>
