@@ -52,7 +52,7 @@ public class PlayerActivity extends AppCompatActivity {
         @Override
         public void run() {
             updateProgress();
-            main.postDelayed(this, 500);
+            main.postDelayed(this, 50);
         }
     };
 
@@ -136,8 +136,8 @@ public class PlayerActivity extends AppCompatActivity {
         shuffleBtn.setOnClickListener(v -> {
             PlayerHolder.get().cycleMode();
             int m = PlayerHolder.get().getPlayMode();
-            String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序播放"
-                    : m == PlayerHolder.MODE_ONE ? "单曲循环" : "随机播放";
+            String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序撔"
+                    : m == PlayerHolder.MODE_ONE ? "单曲徎" : "随机撔";
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
             refreshControls();
         });
@@ -285,7 +285,7 @@ public class PlayerActivity extends AppCompatActivity {
         Track t = ph.currentTrack();
         if (t == null) {
             cover.setImageResource(R.drawable.ic_music_note);
-            title.setText("未在播放");
+            title.setText("朜撔");
             artist.setText("");
             lyricLine.setText("");
             return;
@@ -342,10 +342,12 @@ public class PlayerActivity extends AppCompatActivity {
         if (!ph.isPlaying() && rotateAnim != null && rotateAnim.isRunning()) {
             rotateAnim.pause();
         }
+        // 当前歌曲变化（切歌）时自动重新加载歌曲 */
+        loadLyricsForCurrentTrack();
     }
 
     private void applyBg(int color) {
-        // 柔和深色渐变，不用封面模糊水印
+        // 柔和深色渐变，不用封面模糊模糊水 */
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
                 new int[]{0xFF2B2F3A, 0xFF1A1A22});
@@ -356,7 +358,8 @@ public class PlayerActivity extends AppCompatActivity {
     private void updateFav() {
         Track t = PlayerHolder.get().currentTrack();
         if (t == null) return;
-        favBtn.setImageResource(Prefs.isFav(t) ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+        boolean fav = Prefs.isFav(t);
+        favBtn.setImageResource(fav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
     }
 
     private void refreshControls() {
@@ -393,17 +396,8 @@ public class PlayerActivity extends AppCompatActivity {
             seekBar.setProgress((int) pos);
             curTime.setText(fmt(pos));
             totalTime.setText(fmt(dur));
-            // 完整时长明显长于试听流 → 这是 iTunes 试听片段
-            if (t != null && t.durationMs > dur + 10000) {
-                fullTime.setText("试听 · 全长 " + fmt(t.durationMs));
-                // 试听剩余 <3 秒时提醒一次
-                if (!endWarned && ph.isPlaying() && dur - pos < 3000 && pos > 0) {
-                    endWarned = true;
-                    Toast.makeText(this, "试听片段即将结束，将自动切下一首", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                fullTime.setText("");
-            }
+            // 网易云为完整歌曲，不显示试听提示
+            fullTime.setText("");
         }
         lyricView.updatePosition(pos);
         // 当前歌词行显示
@@ -419,13 +413,15 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private List<LyricLine> currentLines;
+    /** 已加载歌词的歌曲 id，切歌时才重新求歌词，避免重复网络请求 */
+    private String lyricTrackId = null;
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        // 歌曲切换后拉取歌词
+    /** 当前歌曲变化时重新拉取歌词；同一首歌不重复请求*/
+    private void loadLyricsForCurrentTrack() {
         Track t = PlayerHolder.get().currentTrack();
         if (t == null) return;
+        if (t.id != null && t.id.equals(lyricTrackId)) return;
+        lyricTrackId = t.id;
         MusicApi.loadLyrics(t, new MusicApi.LyricCallback() {
             @Override
             public void onSuccess(List<LyricLine> lines) {
@@ -444,6 +440,12 @@ public class PlayerActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // 窗口重新获得焦点（从后台切回）时，歌词与当前歌曲一致：        loadLyricsForCurrentTrack();
     }
 
     private void showTimerDialog() {

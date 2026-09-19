@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 
+import com.redmusic.player.api.MusicApi;
 import com.redmusic.player.model.Track;
 
 import java.util.ArrayList;
@@ -112,6 +113,30 @@ public class PlayerHolder {
         if (queue.isEmpty() || index < 0 || index >= queue.size()) return;
         Track t = queue.get(actualIndex());
         if (t == null) return;
+        if (t.previewUrl == null || t.previewUrl.isEmpty()) {
+            // 网易云歌曲：先异步换取真实播放地址，再开始播放
+            MusicApi.resolveUrl(t, new MusicApi.TrackListCallback() {
+                @Override
+                public void onSuccess(List<Track> tracks) {
+                    main.post(() -> {
+                        // 切歌竞态防护：回调回来时若已切到别的歌，就不覆盖
+                        if (currentTrack() == t) startPlay(t);
+                    });
+                }
+
+                @Override
+                public void onError(String msg) {
+                    main.post(() -> {
+                        if (currentTrack() == t) startPlay(t);
+                    });
+                }
+            });
+        } else {
+            startPlay(t);
+        }
+    }
+
+    private void startPlay(Track t) {
         String url = t.previewUrl;
         if (url == null || url.isEmpty()) {
             url = "https://audio-ssl.itunes.apple.com/itunes-assets/placeholder.m4a";
@@ -226,15 +251,20 @@ public class PlayerHolder {
         player.seekTo(ms);
     }
 
-    /** 循环切换：顺序循环 → 单曲循环 → 随机播放 */
+    /** 循环切换：顺序循环 → 单曲循环 → 随机播放（只改模式，不切歌） */
     public void cycleMode() {
+        int curQueueIdx = actualIndex();  // 记住当前播放的歌在 queue 中的实际下标
         playMode = (playMode + 1) % 3;
         if (playMode == MODE_SHUFFLE) {
-            int cur = actualIndex();
+            // 切到随机：重建随机队列，把当前歌放到最前面
             buildShuffleOrder();
-            int pos = shuffleOrder.indexOf(cur);
-            if (pos > 0) Collections.swap(shuffleOrder, 0, pos);
-            index = 0;
+            int pos = shuffleOrder.indexOf(curQueueIdx);
+            if (pos >= 0) {
+                index = pos;
+            }
+        } else {
+            // 从随机切回顺序/单曲：index 直接用 queue 实际下标，保持当前歌不变
+            index = curQueueIdx;
         }
         notifyChanged();
     }

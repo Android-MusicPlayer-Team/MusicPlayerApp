@@ -66,7 +66,7 @@ public class HomeFragment extends Fragment {
 
         // 头部信息
         TextView header = view.findViewById(R.id.home_header);
-        header.setText("全球热歌榜 Top 50 · 来自 iTunes 公开曲库");
+        header.setText("新歌推荐 · 来自网易云音乐");
     }
 
     private void loadTop() {
@@ -96,25 +96,11 @@ public class HomeFragment extends Fragment {
         List<Track> list = adapter.getTracks();
         if (list.isEmpty()) return;
         Track t = list.get(position);
-        Toast.makeText(getContext(), "加载播放源...", Toast.LENGTH_SHORT).show();
-        // 排行榜歌曲无预览地址，先按歌名解析
-        MusicApi.resolvePreview(t, new MusicApi.TrackListCallback() {
-            @Override
-            public void onSuccess(List<Track> one) {
-                main.post(() -> {
-                    list.set(position, one.get(0));
-                    PlayerHolder.get().playQueue(list, position);
-                    Prefs.addRecent(one.get(0));
-                    if (getContext() != null) {
-                        startActivity(new android.content.Intent(getContext(), PlayerActivity.class));
-                    }
-                });
-            }
-
-            @Override
-            public void onError(String msg) {
-                main.post(() -> Toast.makeText(getContext(), "获取播放源失败", Toast.LENGTH_SHORT).show());
-            }
-        });
+        // 播放地址由 PlayerHolder 内部异步换取，这里直接起播
+        PlayerHolder.get().playQueue(list, position);
+        Prefs.addRecent(t);
+        if (getContext() != null) {
+            startActivity(new android.content.Intent(getContext(), PlayerActivity.class));
+        }
     }
 }

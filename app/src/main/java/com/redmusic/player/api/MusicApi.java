@@ -11,11 +11,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 网易云音乐 API（NeteaseCloudMusicApi）客户端
+ *
+ * 歌曲搜索、播放地址、歌词都用【同一个歌曲 id】查询，
+ * 出自同一个数据库，歌词时间轴与歌曲天然对齐（这就是同步的关键）。
+ *
+ * BASE 地址：
+ *  - 模拟器调试：https://api.2leo.top  （10.0.2.2 是模拟器访问电脑本机的固定地址）
+ *  - 真机调试：改成电脑的局域网 IP，例如 http://192.168.1.100:3000 （手机与电脑同一 WiFi）
+ */
 public class MusicApi {
 
-    public static final String ITUNES_SEARCH = "https://itunes.apple.com/search?media=music&entity=song&limit=30&term=";
-    public static final String ITUNES_TOP = "https://itunes.apple.com/us/rss/topsongs/limit=50/json";
-    public static final String LRCLIB = "https://lrclib.net/api/search";
+    public static final String BASE = "https://api.2leo.top";
 
     public interface TrackListCallback {
         void onSuccess(List<Track> tracks);
@@ -41,7 +49,6 @@ public class MusicApi {
             public void onResult(String body) {
                 List<String> words = new ArrayList<>();
                 try {
-                    // 返回形如 ( {q:"jay",p:false,s:["a","b",...]} );  非标准 JSON，用正则提取 s 数组
                     java.util.regex.Matcher m = java.util.regex.Pattern
                             .compile("s:\\[([^\\]]*)\\]").matcher(body);
                     if (m.find()) {
@@ -64,30 +71,45 @@ public class MusicApi {
         });
     }
 
-    /** iTunes 关键词搜索 */
+    /** 解析网易云 song 对象为 Track（搜索结果 / 新歌推荐共用） */
+    private static Track parseSong(JSONObject o) {
+        Track t = new Track();
+        t.id = String.valueOf(o.optLong("id", 0));
+        t.title = o.optString("name", "未知歌曲");
+        JSONArray artists = o.optJSONArray("artists");
+        if (artists != null && artists.length() > 0) {
+            try {
+                t.artist = artists.getJSONObject(0).optString("name", "未知歌手");
+            } catch (Exception e) {
+                t.artist = "未知歌手";
+            }
+        } else {
+            t.artist = "未知歌手";
+        }
+        JSONObject album = o.optJSONObject("album");
+        if (album != null) {
+            t.album = album.optString("name", "");
+            t.artworkUrl = album.optString("picUrl", "");
+        }
+        t.durationMs = o.optLong("duration", 0);
+        t.previewUrl = ""; // 播放前再用 resolveUrl 换取真实地址
+        return t;
+    }
+
+    /** 网易云关键词搜索 */
     public static void search(String term, TrackListCallback cb) {
-        String url = ITUNES_SEARCH + Uri.encode(term.trim());
+        String url = BASE + "/search?keywords=" + Uri.encode(term.trim()) + "&limit=30";
         ApiClient.get(url, new ApiClient.Callback() {
             @Override
             public void onResult(String body) {
                 List<Track> list = new ArrayList<>();
                 try {
                     JSONObject root = new JSONObject(body);
-                    JSONArray results = root.optJSONArray("results");
-                    if (results != null) {
-                        for (int i = 0; i < results.length(); i++) {
-                            JSONObject o = results.getJSONObject(i);
-                            Track t = new Track();
-                            t.id = String.valueOf(o.optLong("trackId", i));
-                            t.title = o.optString("trackName", "未知歌曲");
-                            t.artist = o.optString("artistName", "未知歌手");
-                            t.album = o.optString("collectionName", "");
-                            String art = o.optString("artworkUrl100", "");
-                            t.artworkUrl = art.isEmpty() ? "" : art.replace("100x100", "400x400");
-                            t.previewUrl = o.optString("previewUrl", "");
-                            t.durationMs = o.optLong("trackTimeMillis", 0);
-                            t.genre = o.optString("primaryGenreName", "");
-                            list.add(t);
+                    JSONObject result = root.optJSONObject("result");
+                    JSONArray songs = result != null ? result.optJSONArray("songs") : null;
+                    if (songs != null) {
+                        for (int i = 0; i < songs.length(); i++) {
+                            list.add(parseSong(songs.getJSONObject(i)));
                         }
                     }
                 } catch (Exception ignored) {
@@ -102,39 +124,24 @@ public class MusicApi {
         });
     }
 
-    /** iTunes 美国区热门歌曲榜 Top 50 */
+    /** 新歌推荐（首页热榜位） */
     public static void topSongs(TrackListCallback cb) {
-        ApiClient.get(ITUNES_TOP, new ApiClient.Callback() {
+        ApiClient.get(BASE + "/personalized/newsong", new ApiClient.Callback() {
             @Override
             public void onResult(String body) {
                 List<Track> list = new ArrayList<>();
                 try {
                     JSONObject root = new JSONObject(body);
-                    JSONObject feed = root.optJSONObject("feed");
-                    JSONArray entries = feed != null ? feed.optJSONArray("entry") : null;
-                    if (entries != null) {
-                        for (int i = 0; i < entries.length(); i++) {
-                            JSONObject e = entries.getJSONObject(i);
-                            Track t = new Track();
-                            t.id = "top_" + i;
-                            t.title = e.optJSONObject("im:name") != null
-                                    ? e.optJSONObject("im:name").optString("label", "未知歌曲")
-                                    : "未知歌曲";
-                            t.artist = e.optJSONObject("im:artist") != null
-                                    ? e.optJSONObject("im:artist").optString("label", "未知歌手")
-                                    : "未知歌手";
-                            t.album = e.optJSONObject("im:collection") != null
-                                    ? e.optJSONObject("im:collection").optJSONObject("im:name").optString("label", "")
-                                    : "";
-                            JSONArray images = e.optJSONArray("im:image");
-                            if (images != null && images.length() > 0) {
-                                t.artworkUrl = images.getJSONObject(images.length() - 1).optString("label", "");
+                    JSONArray data = root.optJSONArray("result");
+                    if (data != null) {
+                        for (int i = 0; i < data.length(); i++) {
+                            JSONObject wrapper = data.getJSONObject(i);
+                            JSONObject song = wrapper.optJSONObject("song");
+                            if (song != null) {
+                                Track t = parseSong(song);
+                                t.rank = i + 1;
+                                list.add(t);
                             }
-                            t.previewUrl = ""; // RSS 榜无预览，播放时按歌名解析
-                            t.genre = "";
-                            t.durationMs = 0;
-                            t.rank = i + 1;
-                            list.add(t);
                         }
                     }
                 } catch (Exception ignored) {
@@ -149,65 +156,55 @@ public class MusicApi {
         });
     }
 
-    /** 解析排行榜歌曲的试听地址（用歌名+歌手回查 iTunes） */
-    public static void resolvePreview(Track t, TrackListCallback cb) {
-        String term = t.title + " " + t.artist;
-        String url = ITUNES_SEARCH + Uri.encode(term.trim());
+    /** 用歌曲 id 换取真实播放地址（网易云 /song/url） */
+    public static void resolveUrl(Track t, TrackListCallback cb) {
+        String url = BASE + "/song/url/v1?id=" + t.id + "&level=standard";
         ApiClient.get(url, new ApiClient.Callback() {
             @Override
             public void onResult(String body) {
                 try {
                     JSONObject root = new JSONObject(body);
-                    JSONArray results = root.optJSONArray("results");
-                    if (results != null && results.length() > 0) {
-                        JSONObject o = results.getJSONObject(0);
-                        t.previewUrl = o.optString("previewUrl", "");
-                        if (t.artworkUrl == null || t.artworkUrl.isEmpty()) {
-                            String art = o.optString("artworkUrl100", "");
-                            t.artworkUrl = art.isEmpty() ? "" : art.replace("100x100", "400x400");
-                        }
-                        t.durationMs = o.optLong("trackTimeMillis", 0);
+                    JSONArray data = root.optJSONArray("data");
+                    if (data != null && data.length() > 0) {
+                        String u = data.getJSONObject(0).optString("url", "");
+                        if (u != null && !u.isEmpty()) t.previewUrl = u;
                     }
                 } catch (Exception ignored) {
                 }
                 List<Track> one = new ArrayList<>();
                 one.add(t);
-                cb.onSuccess(one);
+                cb.onSuccess(one); // 无论成败都回调，让播放继续
             }
 
             @Override
             public void onError(String msg) {
-                cb.onError(msg);
+                List<Track> one = new ArrayList<>();
+                one.add(t);
+                cb.onSuccess(one);
             }
         });
     }
 
-    /** 从 lrclib 获取歌词 */
+    /** 按歌曲 id 从网易云取同步歌词（与播放歌曲同源） */
     public static void loadLyrics(Track t, LyricCallback cb) {
-        String url = LRCLIB + "?track_name=" + Uri.encode(t.title)
-                + "&artist_name=" + Uri.encode(t.artist)
-                + "&album_name=" + Uri.encode(t.album);
+        String url = BASE + "/lyric?id=" + t.id;
         ApiClient.get(url, new ApiClient.Callback() {
             @Override
             public void onResult(String body) {
                 List<LyricLine> lines = new ArrayList<>();
                 try {
-                    JSONArray arr = new JSONArray(body);
-                    for (int i = 0; i < arr.length(); i++) {
-                        JSONObject o = arr.getJSONObject(i);
-                        String synced = o.optString("syncedLyrics", "");
-                        if (synced != null && !synced.isEmpty()) {
-                            lines = LyricLine.parse(synced);
-                            break;
-                        }
+                    JSONObject root = new JSONObject(body);
+                    JSONObject lrc = root.optJSONObject("lrc");
+                    String synced = lrc != null ? lrc.optString("lyric", "") : "";
+                    if (synced != null && !synced.isEmpty()) {
+                        lines = LyricLine.parse(synced);
                     }
-                    if (lines.isEmpty()) {
-                        cb.onError("暂无歌词");
-                    } else {
-                        cb.onSuccess(lines);
-                    }
-                } catch (Exception e) {
-                    cb.onError("歌词解析失败");
+                } catch (Exception ignored) {
+                }
+                if (lines.isEmpty()) {
+                    cb.onError("暂无歌词");
+                } else {
+                    cb.onSuccess(lines);
                 }
             }
 
