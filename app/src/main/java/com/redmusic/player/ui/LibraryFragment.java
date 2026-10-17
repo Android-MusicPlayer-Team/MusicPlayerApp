@@ -102,9 +102,9 @@ public class LibraryFragment extends Fragment {
         actionDel.setTextColor(primary);
         actionBack.setTextColor(primary);
 
-        // 右上角设置图标 → 打开设置页；图标随日夜着色
+        // 右上角设置图标 → 打开设置页；图标跟随皮肤主色
         android.widget.ImageButton settingsBtn = view.findViewById(R.id.library_settings_btn);
-        settingsBtn.setColorFilter(ThemeManager.primaryTextColor(requireContext()));
+        settingsBtn.setColorFilter(ThemeManager.primaryColor(requireContext()));
         settingsBtn.setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), SettingsActivity.class)));
 

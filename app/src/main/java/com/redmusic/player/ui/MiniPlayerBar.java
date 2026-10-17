@@ -14,6 +14,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.redmusic.player.R;
 import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
+import com.redmusic.player.util.ThemeManager;
 
 /** 底部迷你播放栏 */
 public class MiniPlayerBar extends LinearLayout {
@@ -55,5 +56,8 @@ public class MiniPlayerBar extends LinearLayout {
             cover.setImageResource(R.drawable.ic_music_note);
         }
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+        // 播放/列表图标跟随皮肤主色
+        playBtn.setColorFilter(ThemeManager.primaryColor(getContext()));
+        playlistBtn.setColorFilter(ThemeManager.primaryColor(getContext()));
     }
 }

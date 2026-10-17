@@ -97,31 +97,13 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    /** 自定义主色：输入 6 位 hex 颜色（如 C20C0C） */
+    /** 自定义主色：弹出 HSV 色轮取色器 */
     private void showCustomPicker() {
-        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
-        b.setTitle("自定义主题色");
-        b.setMessage("输入 6 位十六进制颜色，例如：C20C0C（红）、1976D2（蓝）");
-        final android.widget.EditText et = new android.widget.EditText(requireContext());
-        et.setHint("C20C0C");
-        b.setView(et);
-        b.setPositiveButton("确定", (d, w) -> {
-            String hex = et.getText().toString().trim().replace("#", "");
-            try {
-                if (hex.length() == 6) {
-                    int color = android.graphics.Color.parseColor("#" + hex);
-                    ThemeManager.setCustomColor(requireContext(), color);
-                    refreshSkinUi();
-                    applyTheme();
-                } else {
-                    android.widget.Toast.makeText(requireContext(), "颜色格式不正确", android.widget.Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception ex) {
-                android.widget.Toast.makeText(requireContext(), "颜色格式不正确", android.widget.Toast.LENGTH_SHORT).show();
-            }
-        });
-        b.setNegativeButton("取消", null);
-        b.show();
+        new ColorPickerDialog(requireContext(), ThemeManager.primaryColor(requireContext()), color -> {
+            ThemeManager.setCustomColor(requireContext(), color);
+            refreshSkinUi();
+            applyTheme();
+        }).show();
     }
 
     private void refreshModeUi() {
