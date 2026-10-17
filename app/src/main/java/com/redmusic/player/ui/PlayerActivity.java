@@ -118,6 +118,11 @@ public class PlayerActivity extends AppCompatActivity {
         timerBtn = findViewById(R.id.player_timer);
         lyricToggle = findViewById(R.id.player_lyric_toggle);
         lyricView = findViewById(R.id.player_lyric_view);
+        // 拖动歌词 → 定位播放位置
+        lyricView.setOnSeekListener(ms -> {
+            PlayerHolder.get().seekTo(ms);
+            lyricView.updatePosition(ms);
+        });
         spectrum = findViewById(R.id.player_spectrum);
         TextView addPlaylistBtn = findViewById(R.id.player_add_playlist);
         addPlaylistBtn.setOnClickListener(v -> {

@@ -17,18 +17,19 @@ import androidx.fragment.app.Fragment;
 
 import com.redmusic.player.R;
 import com.redmusic.player.player.PlayerHolder;
+import com.redmusic.player.util.ThemeManager;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int TAB_HOME = 0;
-    private static final int TAB_SEARCH = 1;
-    private static final int TAB_LIBRARY = 2;
+    private static final int TAB_LIBRARY = 1;
+    private static final int TAB_SETTINGS = 2;
 
     private int currentTab = -1;
     private MiniPlayerBar miniBar;
 
-    private ImageView homeIcon, searchIcon, libIcon;
-    private TextView homeText, searchText, libText;
+    private ImageView homeIcon, libIcon, settingsIcon;
+    private TextView homeText, libText, settingsText;
     private final Runnable playerListener = this::updateMiniBar;
 
     @Override
@@ -40,15 +41,15 @@ public class MainActivity extends AppCompatActivity {
         miniBar = findViewById(R.id.mini_bar);
 
         homeIcon = findViewById(R.id.nav_home_icon);
-        searchIcon = findViewById(R.id.nav_search_icon);
         libIcon = findViewById(R.id.nav_library_icon);
+        settingsIcon = findViewById(R.id.nav_settings_icon);
         homeText = findViewById(R.id.nav_home_text);
-        searchText = findViewById(R.id.nav_search_text);
         libText = findViewById(R.id.nav_library_text);
+        settingsText = findViewById(R.id.nav_settings_text);
 
         findViewById(R.id.nav_home).setOnClickListener(v -> selectTab(TAB_HOME));
-        findViewById(R.id.nav_search).setOnClickListener(v -> selectTab(TAB_SEARCH));
         findViewById(R.id.nav_library).setOnClickListener(v -> selectTab(TAB_LIBRARY));
+        findViewById(R.id.nav_settings).setOnClickListener(v -> selectTab(TAB_SETTINGS));
 
         miniBar.setOnClickListener(v -> {
             if (PlayerHolder.get().hasTrack()) {
@@ -76,10 +77,10 @@ public class MainActivity extends AppCompatActivity {
         }
         currentTab = tab;
         Fragment f;
-        if (tab == TAB_SEARCH) {
-            f = new SearchFragment();
-        } else if (tab == TAB_LIBRARY) {
+        if (tab == TAB_LIBRARY) {
             f = new LibraryFragment();
+        } else if (tab == TAB_SETTINGS) {
+            f = new SettingsFragment();
         } else {
             f = new HomeFragment();
         }
@@ -87,14 +88,14 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, f)
                 .commit();
 
-        int red = 0xFFC20C0C;
+        int primary = ThemeManager.primaryColor(this);
         int gray = 0xFF888888;
-        homeIcon.setColorFilter(tab == TAB_HOME ? red : gray);
-        searchIcon.setColorFilter(tab == TAB_SEARCH ? red : gray);
-        libIcon.setColorFilter(tab == TAB_LIBRARY ? red : gray);
-        homeText.setTextColor(tab == TAB_HOME ? red : gray);
-        searchText.setTextColor(tab == TAB_SEARCH ? red : gray);
-        libText.setTextColor(tab == TAB_LIBRARY ? red : gray);
+        homeIcon.setColorFilter(tab == TAB_HOME ? primary : gray);
+        libIcon.setColorFilter(tab == TAB_LIBRARY ? primary : gray);
+        settingsIcon.setColorFilter(tab == TAB_SETTINGS ? primary : gray);
+        homeText.setTextColor(tab == TAB_HOME ? primary : gray);
+        libText.setTextColor(tab == TAB_LIBRARY ? primary : gray);
+        settingsText.setTextColor(tab == TAB_SETTINGS ? primary : gray);
     }
 
     private void updateMiniBar() {

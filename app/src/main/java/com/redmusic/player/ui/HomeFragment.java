@@ -22,7 +22,9 @@ import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
 import com.redmusic.player.util.PlaylistHelper;
 import com.redmusic.player.util.Prefs;
+import com.redmusic.player.util.ThemeManager;
 
+import android.content.Intent;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -40,6 +42,13 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // 右上角搜索入口 → 打开搜索页
+        view.findViewById(R.id.home_search_btn).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), SearchActivity.class)));
+        // 标题跟随皮肤主色
+        TextView title = view.findViewById(R.id.home_title);
+        if (title != null) title.setTextColor(ThemeManager.primaryColor(requireContext()));
+
         adapter = new TrackAdapter(true, false);
         adapter.setAction(new TrackAdapter.OnAction() {
             @Override

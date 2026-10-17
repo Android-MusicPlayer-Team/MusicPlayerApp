@@ -4,13 +4,15 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.redmusic.player.model.LyricLine;
 
 import java.util.List;
+import java.util.Locale;
 
-/** 滚动歌词视图：当前行高亮放大，随播放进度平滑滚动，上下行远近淡入淡出 */
+/** 滚动歌词视图：当前行高亮放大，随播放进度平滑滚动，上下行远近淡入淡出；支持拖动歌词定位播放位置 */
 public class LyricView extends View {
     private List<LyricLine> lines;
     private long positionMs = 0;
@@ -21,6 +23,20 @@ public class LyricView extends View {
     private boolean fullScreen = false;
     private float activeSize;
     private float normalSize;
+
+    /** 拖动歌词定位到播放位置的回调 */
+    public interface OnSeekListener {
+        void onSeekTo(long timeMs);
+    }
+
+    private OnSeekListener onSeek;
+    /** 是否正在拖动歌词 */
+    private boolean dragging = false;
+    /** 拖动中的预览时间（目标播放位置） */
+    private long previewPositionMs = 0;
+    /** 按下时记录的基准 */
+    private long dragStartPosMs = 0;
+    private float dragStartY = 0f;
 
     public LyricView(Context context) {
         this(context, null);
@@ -73,6 +89,60 @@ public class LyricView extends View {
         invalidate();
     }
 
+    public void setOnSeekListener(OnSeekListener l) {
+        onSeek = l;
+    }
+
+    /** 根据时间找所在歌词行 */
+    private int findIndex(long pos) {
+        if (lines == null || lines.isEmpty()) return 0;
+        int cur = 0;
+        for (int i = 0; i < lines.size(); i++) {
+            if (pos >= lines.get(i).timeMs) cur = i;
+            else break;
+        }
+        return cur;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (lines == null || lines.isEmpty()) return super.onTouchEvent(ev);
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+                dragging = true;
+                dragStartY = ev.getY();
+                dragStartPosMs = positionMs;
+                previewPositionMs = positionMs;
+                getParent().requestDisallowInterceptTouchEvent(true);
+                invalidate();
+                return true;
+            case MotionEvent.ACTION_MOVE: {
+                // 上滑（y 减小）→ 更晚时间，下滑 → 更早时间；按行换算
+                float lineDelta = (dragStartY - ev.getY()) / lineHeight;
+                int startLine = findIndex(dragStartPosMs);
+                int target = startLine + Math.round(lineDelta);
+                if (target < 0) target = 0;
+                if (target >= lines.size()) target = lines.size() - 1;
+                previewPositionMs = lines.get(target).timeMs;
+                invalidate();
+                return true;
+            }
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL: {
+                dragging = false;
+                if (onSeek != null) onSeek.onSeekTo(previewPositionMs);
+                invalidate();
+                return true;
+            }
+        }
+        return super.onTouchEvent(ev);
+    }
+
+    private String fmtTime(long ms) {
+        long s = ms / 1000;
+        return String.format(Locale.US, "%02d:%02d", s / 60, s % 60);
+    }
+
     private float dp(float v) {
         return v * getResources().getDisplayMetrics().density;
     }
@@ -90,19 +160,18 @@ public class LyricView extends View {
         }
         int center = getHeight() / 2;
 
+        // 拖动歌词时用预览时间定位，否则跟随播放进度
+        long drawPos = dragging ? previewPositionMs : positionMs;
+
         // 找当前行
-        int cur = 0;
-        for (int i = 0; i < lines.size(); i++) {
-            if (positionMs >= lines.get(i).timeMs) cur = i;
-            else break;
-        }
+        int cur = findIndex(drawPos);
         // 在当前行与下一行之间插值，实现平滑滚动
         float frac = 0f;
         if (cur < lines.size() - 1) {
             long curT = lines.get(cur).timeMs;
             long nextT = lines.get(cur + 1).timeMs;
             if (nextT > curT) {
-                frac = (positionMs - curT) / (float) (nextT - curT);
+                frac = (drawPos - curT) / (float) (nextT - curT);
                 if (frac < 0) frac = 0;
                 if (frac > 1) frac = 1;
             }
@@ -146,6 +215,22 @@ public class LyricView extends View {
                 Paint.FontMetrics fm = normalPaint.getFontMetrics();
                 canvas.drawText(text, getWidth() / 2f, y - (fm.ascent + fm.descent) / 2f, normalPaint);
             }
+        }
+
+        // 拖动歌词时：顶部显示目标时间提示
+        if (dragging) {
+            Paint tip = new Paint(Paint.ANTI_ALIAS_FLAG);
+            tip.setColor(0xFFFFFFFF);
+            tip.setTextSize(dp(13));
+            tip.setTextAlign(Paint.Align.CENTER);
+            String t = fmtTime(previewPositionMs);
+            float tw = tip.measureText(t);
+            float pad = dp(14);
+            float cx = getWidth() / 2f;
+            float cy = center - lineHeight * 2.4f;
+            canvas.drawRoundRect(cx - tw / 2f - pad, cy - dp(16),
+                    cx + tw / 2f + pad, cy + dp(16), dp(16), dp(16), activeBack);
+            canvas.drawText(t, cx, cy - (tip.getFontMetrics().ascent + tip.getFontMetrics().descent) / 2f, tip);
         }
     }
 }

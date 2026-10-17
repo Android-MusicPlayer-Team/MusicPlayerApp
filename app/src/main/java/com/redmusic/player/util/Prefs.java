@@ -197,4 +197,22 @@ public class Prefs {
             return null;
         }
     }
+
+    // ================= 设置项（主题等） =================
+
+    public static void setInt(String k, int v) {
+        sp.edit().putInt(k, v).apply();
+    }
+
+    public static int getInt(String k, int def) {
+        return sp.getInt(k, def);
+    }
+
+    public static void setBool(String k, boolean v) {
+        sp.edit().putBoolean(k, v).apply();
+    }
+
+    public static boolean getBool(String k, boolean def) {
+        return sp.getBoolean(k, def);
+    }
 }

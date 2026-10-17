@@ -54,6 +54,10 @@ public class SearchFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         input = view.findViewById(R.id.search_input);
         ImageButton go = view.findViewById(R.id.search_go);
+        // 独立 Activity 打开搜索页时左上角返回
+        view.findViewById(R.id.search_back).setOnClickListener(v -> {
+            if (getActivity() != null) getActivity().finish();
+        });
         historyWrap = view.findViewById(R.id.history_wrap);
         emptyTip = view.findViewById(R.id.search_empty);
 

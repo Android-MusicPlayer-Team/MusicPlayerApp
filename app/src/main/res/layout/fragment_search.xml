@@ -13,6 +13,15 @@
         android:paddingTop="16dp"
         android:paddingEnd="16dp">
 
+        <ImageButton
+            android:id="@+id/search_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="4dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="返回"
+            android:src="@drawable/ic_arrow_back" />
+
         <EditText
             android:id="@+id/search_input"
             android:layout_width="0dp"
@@ -26,8 +35,8 @@
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:singleLine="true"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#888888"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
             android:textSize="14sp" />
 
         <ImageButton
@@ -47,7 +56,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="4dp"
-        android:background="#1F1F1F"
+        android:background="@color/bg_card"
         android:visibility="gone"
         android:maxHeight="320dp"
         android:clipToPadding="false" />

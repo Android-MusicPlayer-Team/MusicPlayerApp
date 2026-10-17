@@ -2,8 +2,9 @@
 <resources>
     <color name="red">#C20C0C</color>
     <color name="red_light">#FF6B6B</color>
-    <color name="bg">#121212</color>
-    <color name="bg_card">#1E1E1E</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#B3B3B3</color>
+    <!-- 白天模式配色 -->
+    <color name="bg">#F5F5F5</color>
+    <color name="bg_card">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#888888</color>
 </resources>
