@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int currentTab = -1;
     private MiniPlayerBar miniBar;
+    private int lastThemeRev = -1;
 
     private ImageView homeIcon, libIcon;
     private TextView homeText, libText;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         updateMiniBar();
         selectTab(TAB_HOME);
         requestNotifPermission();
+        lastThemeRev = com.redmusic.player.util.Prefs.getInt("theme_rev", 0);
     }
 
     /** Android 13+ 请求通知权限（后台播放的通知栏控制需要） */
@@ -99,6 +101,12 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         PlayerHolder.get().addListener(playerListener);
         updateMiniBar();
+        // 主题在设置页变更后，回到主界面时同步重建（换肤/日夜生效）
+        int rev = com.redmusic.player.util.Prefs.getInt("theme_rev", 0);
+        if (lastThemeRev >= 0 && rev != lastThemeRev) {
+            lastThemeRev = rev;
+            recreate();
+        }
     }
 
     @Override

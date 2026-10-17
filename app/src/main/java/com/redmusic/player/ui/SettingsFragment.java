@@ -137,8 +137,9 @@ public class SettingsFragment extends Fragment {
         return Math.round(v * getResources().getDisplayMetrics().density);
     }
 
-    /** 主题已变，整体重建 MainActivity 使皮肤/日夜生效 */
+    /** 主题已变，重建设置页；MainActivity 回到前台时也会检测 theme_rev 同步重建 */
     private void applyTheme() {
+        Prefs.setInt("theme_rev", Prefs.getInt("theme_rev", 0) + 1);
         if (getActivity() != null) getActivity().recreate();
     }
 }
