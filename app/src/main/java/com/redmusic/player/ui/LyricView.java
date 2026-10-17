@@ -198,8 +198,10 @@ public class LyricView extends View {
                 // 当前行：文字中间为主题色、向两边减淡到普通歌词色（无胶囊背景）
                 activePaint.setAlpha(255);
                 float w = activePaint.measureText(text);
-                float left = getWidth() / 2f - w / 2f;
-                float right = getWidth() / 2f + w / 2f;
+                float cx = getWidth() / 2f;
+                float fade = w * 0.7f; // 减淡范围：向歌词两端各扩展 70%，让淡化发生在歌词之外
+                float left = cx - w / 2f - fade;
+                float right = cx + w / 2f + fade;
                 int fg = ThemeManager.isDark(getContext()) ? 0xFFFFFFFF : 0xFF33363D;
                 int pc = ThemeManager.primaryColor(getContext());
                 activePaint.setShader(new LinearGradient(
