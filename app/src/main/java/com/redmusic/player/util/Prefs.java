@@ -3,10 +3,7 @@ package com.redmusic.player.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-<<<<<<< HEAD
 import com.redmusic.player.model.Playlist;
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import com.redmusic.player.model.Track;
 
 import org.json.JSONArray;
@@ -100,7 +97,6 @@ public class Prefs {
         sp.edit().remove("history").apply();
     }
 
-<<<<<<< HEAD
     // ================= 我导入的音乐 =================
 
     /** 保存导入的本地歌曲列表（扫描指定目录得到） */
@@ -167,8 +163,6 @@ public class Prefs {
         return list;
     }
 
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     public static String trackToJson(Track t) {
         try {
             JSONObject o = new JSONObject();
@@ -178,10 +172,7 @@ public class Prefs {
             o.put("album", t.album);
             o.put("art", t.artworkUrl);
             o.put("pre", t.previewUrl);
-<<<<<<< HEAD
             o.put("lyr", t.lyricFile);
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
             o.put("dur", t.durationMs);
             return o.toString();
         } catch (Exception e) {
@@ -199,10 +190,7 @@ public class Prefs {
             t.album = o.optString("album");
             t.artworkUrl = o.optString("art");
             t.previewUrl = o.optString("pre");
-<<<<<<< HEAD
             t.lyricFile = o.optString("lyr");
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
             t.durationMs = o.optLong("dur");
             return t;
         } catch (Exception e) {

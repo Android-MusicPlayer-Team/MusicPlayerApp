@@ -28,13 +28,10 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         void onPlay(int position);
 
         void onFav(Track t);
-<<<<<<< HEAD
 
         /** 长按歌曲（默认空实现，不强制各界面实现） */
         default void onLongPress(Track t) {
         }
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     }
 
     private final List<Track> tracks = new ArrayList<>();
@@ -99,32 +96,18 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         } else {
             h.rank.setVisibility(View.GONE);
         }
-<<<<<<< HEAD
         // 红心始终按收藏状态显示：收藏页全亮；最近播放/其他页未收藏则显示空心灰心
         h.fav.setVisibility(View.VISIBLE);
         boolean isFav = Prefs.isFav(t);
         h.fav.setImageResource(isFav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-=======
-        if (favMode) {
-            h.fav.setVisibility(View.VISIBLE);
-            h.fav.setImageResource(R.drawable.ic_heart_filled);
-        } else {
-            h.fav.setVisibility(View.VISIBLE);
-            boolean isFav = Prefs.isFav(t);
-            h.fav.setImageResource(isFav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-        }
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         h.fav.setColorFilter(0xFFC20C0C);
         h.itemView.setOnClickListener(v -> {
             if (action != null) action.onPlay(position);
         });
-<<<<<<< HEAD
         h.itemView.setOnLongClickListener(v -> {
             if (action != null) action.onLongPress(t);
             return true;
         });
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         h.fav.setOnClickListener(v -> {
             if (action != null) action.onFav(t);
         });

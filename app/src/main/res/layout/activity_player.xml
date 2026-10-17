@@ -70,7 +70,6 @@
             </LinearLayout>
 
             <TextView
-<<<<<<< HEAD
                 android:id="@+id/player_add_playlist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -85,8 +84,6 @@
                 android:textSize="12sp" />
 
             <TextView
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
                 android:id="@+id/player_timer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -1,6 +1,5 @@
 package com.redmusic.player.ui;
 
-<<<<<<< HEAD
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,14 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-=======
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +28,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.redmusic.player.R;
-<<<<<<< HEAD
 import com.redmusic.player.api.MusicApi;
 import com.redmusic.player.model.Playlist;
 import com.redmusic.player.model.Track;
@@ -80,20 +70,6 @@ public class LibraryFragment extends Fragment {
     private File browseFolder;
     private final Deque<File> browseStack = new ArrayDeque<>();
     private final List<File> browseChildren = new ArrayList<>();
-=======
-import com.redmusic.player.model.Track;
-import com.redmusic.player.player.PlayerHolder;
-import com.redmusic.player.util.Prefs;
-
-import java.util.List;
-
-public class LibraryFragment extends Fragment {
-
-    private final Handler main = new Handler(Looper.getMainLooper());
-    private TrackAdapter adapter;
-    private TextView tabFav, tabRecent, emptyTip;
-    private boolean favMode = true;
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 
     @Nullable
     @Override
@@ -106,7 +82,6 @@ public class LibraryFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         tabFav = view.findViewById(R.id.tab_fav);
         tabRecent = view.findViewById(R.id.tab_recent);
-<<<<<<< HEAD
         tabImport = view.findViewById(R.id.tab_import);
         tabPlaylists = view.findViewById(R.id.tab_playlists);
         actionScan = view.findViewById(R.id.action_scan);
@@ -126,19 +101,6 @@ public class LibraryFragment extends Fragment {
                 PlayerHolder.get().playQueue(cur, position);
                 Prefs.addRecent(cur.get(position));
                 startActivity(new Intent(getContext(), PlayerActivity.class));
-=======
-        emptyTip = view.findViewById(R.id.lib_empty);
-
-        adapter = new TrackAdapter(false, true);
-        adapter.setAction(new TrackAdapter.OnAction() {
-            @Override
-            public void onPlay(int position) {
-                List<Track> list = adapter.getTracks();
-                if (list.isEmpty()) return;
-                PlayerHolder.get().playQueue(list, position);
-                Prefs.addRecent(list.get(position));
-                startActivity(new android.content.Intent(getContext(), PlayerActivity.class));
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
             }
 
             @Override
@@ -147,7 +109,6 @@ public class LibraryFragment extends Fragment {
                 refresh();
                 Toast.makeText(getContext(), Prefs.isFav(t) ? "已收藏" : "已取消收藏", Toast.LENGTH_SHORT).show();
             }
-<<<<<<< HEAD
 
             @Override
             public void onLongPress(Track t) {
@@ -180,24 +141,6 @@ public class LibraryFragment extends Fragment {
         });
 
         setTab(TAB_FAV);
-=======
-        });
-        RecyclerView list = view.findViewById(R.id.lib_list);
-        list.setLayoutManager(new LinearLayoutManager(getContext()));
-        list.setAdapter(adapter);
-
-        tabFav.setOnClickListener(v -> {
-            favMode = true;
-            updateTabs();
-            refresh();
-        });
-        tabRecent.setOnClickListener(v -> {
-            favMode = false;
-            updateTabs();
-            refresh();
-        });
-        updateTabs();
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         refresh();
     }
 
@@ -207,7 +150,6 @@ public class LibraryFragment extends Fragment {
         refresh();
     }
 
-<<<<<<< HEAD
     private void setTab(int tab) {
         currentTab = tab;
         updateTabColors();
@@ -669,21 +611,5 @@ public class LibraryFragment extends Fragment {
                 })
                 .setNegativeButton("取消", null)
                 .show();
-=======
-    private void updateTabs() {
-        tabFav.setTextColor(favMode ? 0xFFC20C0C : 0xFFAAAAAA);
-        tabRecent.setTextColor(favMode ? 0xFFAAAAAA : 0xFFC20C0C);
-    }
-
-    private void refresh() {
-        List<Track> list = favMode ? Prefs.getFavs() : Prefs.getRecents();
-        adapter.setTracks(list);
-        if (list.isEmpty()) {
-            emptyTip.setVisibility(View.VISIBLE);
-            emptyTip.setText(favMode ? "还没有收藏的歌曲\n在歌曲列表点 ♥ 收藏" : "还没有播放记录");
-        } else {
-            emptyTip.setVisibility(View.GONE);
-        }
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     }
 }

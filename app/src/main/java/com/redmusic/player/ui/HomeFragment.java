@@ -20,10 +20,7 @@ import com.redmusic.player.R;
 import com.redmusic.player.api.MusicApi;
 import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
-<<<<<<< HEAD
 import com.redmusic.player.util.PlaylistHelper;
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import com.redmusic.player.util.Prefs;
 
 import java.util.List;
@@ -59,15 +56,12 @@ public class HomeFragment extends Fragment {
                 int p = adapter.getTracks().indexOf(t);
                 if (p >= 0) adapter.notifyItemChanged(p);
             }
-<<<<<<< HEAD
 
             @Override
             public void onLongPress(Track t) {
                 // 长按网络歌曲 → 加入歌单
                 PlaylistHelper.addToPlaylist(requireContext(), t);
             }
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         });
         RecyclerView list = view.findViewById(R.id.home_list);
         list.setLayoutManager(new LinearLayoutManager(getContext()));

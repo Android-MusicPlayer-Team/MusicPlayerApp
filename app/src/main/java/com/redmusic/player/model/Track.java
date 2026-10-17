@@ -7,11 +7,8 @@ public class Track {
     public String album = "";
     public String artworkUrl = "";
     public String previewUrl = "";
-<<<<<<< HEAD
     /** 本地歌曲同目录的同名 .lrc 歌词文件（file:// uri，无则空） */
     public String lyricFile = "";
-=======
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     public long durationMs = 0;
     public String genre = "";
     public int rank = 0; // 排行榜序号

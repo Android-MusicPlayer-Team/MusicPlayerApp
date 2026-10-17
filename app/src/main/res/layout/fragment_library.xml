@@ -19,13 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-<<<<<<< HEAD
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
-=======
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp">
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 
         <TextView
             android:id="@+id/tab_fav"
@@ -35,11 +30,7 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="收藏"
-<<<<<<< HEAD
             android:textSize="14sp" />
-=======
-            android:textSize="15sp" />
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 
         <TextView
             android:id="@+id/tab_recent"
@@ -49,7 +40,6 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="最近播放"
-<<<<<<< HEAD
             android:textSize="14sp" />
 
         <TextView
@@ -137,9 +127,6 @@
             android:textColor="#C20C0C"
             android:textSize="14sp"
             android:visibility="gone" />
-=======
-            android:textSize="15sp" />
->>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
