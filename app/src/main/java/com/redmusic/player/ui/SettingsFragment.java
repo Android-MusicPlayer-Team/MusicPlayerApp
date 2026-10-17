@@ -1,6 +1,7 @@
 package com.redmusic.player.ui;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -92,7 +93,12 @@ public class SettingsFragment extends Fragment {
                 Prefs.setInt("icon_idx", idx);
                 setLauncherIcon(idx);
                 refreshIconUi();
-                Toast.makeText(requireContext(), "图标已切换，返回桌面后生效", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "图标已切换", Toast.LENGTH_SHORT).show();
+                // 自动返回桌面，方便查看新图标
+                Intent home = new Intent(Intent.ACTION_MAIN);
+                home.addCategory(Intent.CATEGORY_HOME);
+                home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                requireContext().startActivity(home);
             });
         }
 
