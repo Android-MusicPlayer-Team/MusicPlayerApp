@@ -98,14 +98,6 @@ public class PlaylistDialog extends Dialog {
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setPadding(0, dp(ctx, 14), 0, dp(ctx, 14));
-            if (i == cur) {
-                // 当前播放：方形圆角背景框（主题色半透明，调亮），文字主题色
-                android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
-                gd.setCornerRadius(dp(ctx, 12));
-                gd.setColor((pc & 0x00FFFFFF) | 0x52000000);
-                row.setBackground(gd);
-                row.setPadding(dp(ctx, 14), dp(ctx, 14), dp(ctx, 14), dp(ctx, 14));
-            }
 
             TextView idx = new TextView(ctx);
             idx.setText(String.valueOf(i + 1));
