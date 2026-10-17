@@ -23,13 +23,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int TAB_HOME = 0;
     private static final int TAB_LIBRARY = 1;
-    private static final int TAB_SETTINGS = 2;
 
     private int currentTab = -1;
     private MiniPlayerBar miniBar;
 
-    private ImageView homeIcon, libIcon, settingsIcon;
-    private TextView homeText, libText, settingsText;
+    private ImageView homeIcon, libIcon;
+    private TextView homeText, libText;
     private final Runnable playerListener = this::updateMiniBar;
 
     @Override
@@ -42,14 +41,11 @@ public class MainActivity extends AppCompatActivity {
 
         homeIcon = findViewById(R.id.nav_home_icon);
         libIcon = findViewById(R.id.nav_library_icon);
-        settingsIcon = findViewById(R.id.nav_settings_icon);
         homeText = findViewById(R.id.nav_home_text);
         libText = findViewById(R.id.nav_library_text);
-        settingsText = findViewById(R.id.nav_settings_text);
 
         findViewById(R.id.nav_home).setOnClickListener(v -> selectTab(TAB_HOME));
         findViewById(R.id.nav_library).setOnClickListener(v -> selectTab(TAB_LIBRARY));
-        findViewById(R.id.nav_settings).setOnClickListener(v -> selectTab(TAB_SETTINGS));
 
         miniBar.setOnClickListener(v -> {
             if (PlayerHolder.get().hasTrack()) {
@@ -79,8 +75,6 @@ public class MainActivity extends AppCompatActivity {
         Fragment f;
         if (tab == TAB_LIBRARY) {
             f = new LibraryFragment();
-        } else if (tab == TAB_SETTINGS) {
-            f = new SettingsFragment();
         } else {
             f = new HomeFragment();
         }
@@ -92,10 +86,8 @@ public class MainActivity extends AppCompatActivity {
         int gray = 0xFF888888;
         homeIcon.setColorFilter(tab == TAB_HOME ? primary : gray);
         libIcon.setColorFilter(tab == TAB_LIBRARY ? primary : gray);
-        settingsIcon.setColorFilter(tab == TAB_SETTINGS ? primary : gray);
         homeText.setTextColor(tab == TAB_HOME ? primary : gray);
         libText.setTextColor(tab == TAB_LIBRARY ? primary : gray);
-        settingsText.setTextColor(tab == TAB_SETTINGS ? primary : gray);
     }
 
     private void updateMiniBar() {

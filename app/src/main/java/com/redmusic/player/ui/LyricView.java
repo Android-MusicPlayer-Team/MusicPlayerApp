@@ -8,6 +8,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.redmusic.player.model.LyricLine;
+import com.redmusic.player.util.ThemeManager;
 
 import java.util.List;
 import java.util.Locale;
@@ -44,13 +45,15 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 当前行纯白加粗，其余半透明白，提示条淡白胶囊
-        activePaint.setColor(0xFFFFFFFF);
+        // 歌词随主题：夜间浅色、白天深色；当前行用皮肤主色
+        int primary = ThemeManager.primaryColor(context);
+        int text = ThemeManager.primaryTextColor(context);
+        activePaint.setColor(primary);
         activePaint.setFakeBoldText(true);
         activePaint.setTextAlign(Paint.Align.CENTER);
-        normalPaint.setColor(0xFFFFFFFF);
+        normalPaint.setColor(text);
         normalPaint.setTextAlign(Paint.Align.CENTER);
-        activeBack.setColor(0x22FFFFFF);
+        activeBack.setColor(ThemeManager.isDark(context) ? 0x22FFFFFF : 0x22000000);
         applySizes();
     }
 
@@ -152,7 +155,7 @@ public class LyricView extends View {
         super.onDraw(canvas);
         if (lines == null || lines.isEmpty()) {
             Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-            p.setColor(0x66FFFFFF);
+            p.setColor(ThemeManager.isDark(getContext()) ? 0x66FFFFFF : 0x66000000);
             p.setTextSize(dp(14));
             p.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("暂无歌词", getWidth() / 2f, getHeight() / 2f, p);
@@ -220,7 +223,7 @@ public class LyricView extends View {
         // 拖动歌词时：顶部显示目标时间提示
         if (dragging) {
             Paint tip = new Paint(Paint.ANTI_ALIAS_FLAG);
-            tip.setColor(0xFFFFFFFF);
+            tip.setColor(ThemeManager.primaryTextColor(getContext()));
             tip.setTextSize(dp(13));
             tip.setTextAlign(Paint.Align.CENTER);
             String t = fmtTime(previewPositionMs);

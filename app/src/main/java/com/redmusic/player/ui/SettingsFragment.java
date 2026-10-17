@@ -30,6 +30,13 @@ public class SettingsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        // 独立设置页返回（退出）
+        android.widget.ImageButton backBtn = view.findViewById(R.id.settings_back);
+        backBtn.setColorFilter(ThemeManager.primaryTextColor(requireContext()));
+        backBtn.setOnClickListener(v -> {
+            if (getActivity() != null) getActivity().finish();
+        });
+
         skinViews = new View[]{
                 view.findViewById(R.id.skin_0),
                 view.findViewById(R.id.skin_1),

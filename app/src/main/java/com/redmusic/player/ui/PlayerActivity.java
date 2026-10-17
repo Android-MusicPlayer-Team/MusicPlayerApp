@@ -42,6 +42,7 @@ import com.redmusic.player.model.Track;
 import com.redmusic.player.util.PlaylistHelper;
 import com.redmusic.player.player.PlayerHolder;
 import com.redmusic.player.util.Prefs;
+import com.redmusic.player.util.ThemeManager;
 
 import java.io.InputStream;
 import java.util.List;
@@ -136,7 +137,9 @@ public class PlayerActivity extends AppCompatActivity {
         rotateAnim.setRepeatCount(ValueAnimator.INFINITE);
         rotateAnim.setInterpolator(new LinearInterpolator());
 
-        findViewById(R.id.player_back).setOnClickListener(v -> finish());
+        android.widget.ImageButton backBtn = findViewById(R.id.player_back);
+        backBtn.setColorFilter(ThemeManager.primaryTextColor(this));
+        backBtn.setOnClickListener(v -> finish());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -368,10 +371,13 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void applyBg(int color) {
-        // 柔和深色渐变，不用封面模糊模糊水 */
+        // 背景渐变随日夜：夜间深色、白天浅色
+        boolean dark = ThemeManager.isDark(this);
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
-                new int[]{0xFF2B2F3A, 0xFF1A1A22});
+                dark
+                        ? new int[]{0xFF2B2F3A, 0xFF1A1A22}
+                        : new int[]{0xFFE8E8EA, 0xFFD8D8DC});
         gd.setCornerRadius(0);
         bgGradient.setBackground(gd);
     }
@@ -381,24 +387,33 @@ public class PlayerActivity extends AppCompatActivity {
         if (t == null) return;
         boolean fav = Prefs.isFav(t);
         favBtn.setImageResource(fav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+        favBtn.setColorFilter(fav ? ThemeManager.primaryColor(this)
+                : ThemeManager.secondaryTextColor(this));
     }
 
     private void refreshControls() {
         PlayerHolder ph = PlayerHolder.get();
+        // 图标随日夜：夜间浅色、白天深色
+        int icon = ThemeManager.primaryTextColor(this);
+        int sub = ThemeManager.secondaryTextColor(this);
+        int primary = ThemeManager.primaryColor(this);
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+        playBtn.setColorFilter(icon);
+        prevBtn.setColorFilter(icon);
+        nextBtn.setColorFilter(icon);
         int m = ph.getPlayMode();
         if (m == PlayerHolder.MODE_ONE) {
             shuffleBtn.setImageResource(R.drawable.ic_repeat_one);
-            shuffleBtn.setColorFilter(0xFFFFFFFF);
+            shuffleBtn.setColorFilter(primary);
         } else if (m == PlayerHolder.MODE_SHUFFLE) {
             shuffleBtn.setImageResource(R.drawable.ic_shuffle);
-            shuffleBtn.setColorFilter(0xFFFFFFFF);
+            shuffleBtn.setColorFilter(primary);
         } else {
             shuffleBtn.setImageResource(R.drawable.ic_repeat);
-            shuffleBtn.setColorFilter(0xFFAAAAAA);
+            shuffleBtn.setColorFilter(sub);
         }
         repeatBtn.setImageResource(R.drawable.ic_playlist);
-        repeatBtn.setColorFilter(0xFFDDDDDD);
+        repeatBtn.setColorFilter(sub);
     }
 
     private void updateProgress() {
