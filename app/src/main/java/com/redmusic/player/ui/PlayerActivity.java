@@ -397,10 +397,10 @@ public class PlayerActivity extends AppCompatActivity {
         int m = ph.getPlayMode();
         if (m == PlayerHolder.MODE_ONE) {
             shuffleBtn.setImageResource(R.drawable.ic_repeat_one);
-            shuffleBtn.setColorFilter(ThemeManager.primaryColor(this));
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
         } else if (m == PlayerHolder.MODE_SHUFFLE) {
             shuffleBtn.setImageResource(R.drawable.ic_shuffle);
-            shuffleBtn.setColorFilter(ThemeManager.primaryColor(this));
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
         } else {
             shuffleBtn.setImageResource(R.drawable.ic_repeat);
             shuffleBtn.setColorFilter(0xFFFFFFFF);
