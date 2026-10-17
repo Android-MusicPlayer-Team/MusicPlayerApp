@@ -1,12 +1,18 @@
 package com.redmusic.player.player;
 
 import android.content.Context;
+<<<<<<< HEAD
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 
 import androidx.core.content.ContextCompat;
 
+=======
+import android.os.Handler;
+import android.os.Looper;
+
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
@@ -29,7 +35,10 @@ public class PlayerHolder {
     public static final int MODE_SHUFFLE = 2;
 
     private final ExoPlayer player;
+<<<<<<< HEAD
     private final Context appContext;
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     private final Handler main = new Handler(Looper.getMainLooper());
     private final List<Track> queue = new ArrayList<>();
     private final List<Runnable> listeners = new CopyOnWriteArrayList<>();
@@ -39,11 +48,14 @@ public class PlayerHolder {
     private List<Integer> shuffleOrder = new ArrayList<>();
     private float speed = 1f;
 
+<<<<<<< HEAD
     /** 连续播放失败计数（用于整单无法播放判定） */
     private int consecutiveFailures = 0;
     /** 整单都无法播放（如完全无网络） */
     private boolean allFailed = false;
 
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     public static synchronized void init(Context ctx) {
         if (sInstance == null) {
             sInstance = new PlayerHolder(ctx.getApplicationContext());
@@ -55,16 +67,22 @@ public class PlayerHolder {
     }
 
     private PlayerHolder(Context ctx) {
+<<<<<<< HEAD
         appContext = ctx.getApplicationContext();
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         player = new ExoPlayer.Builder(ctx).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int state) {
+<<<<<<< HEAD
                 if (state == Player.STATE_READY) {
                     // 能正常播放了，重置失败计数
                     consecutiveFailures = 0;
                     allFailed = false;
                 }
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
                 if (state == Player.STATE_ENDED) {
                     onTrackEnded();
                 }
@@ -73,8 +91,11 @@ public class PlayerHolder {
 
             @Override
             public void onPlayerError(PlaybackException error) {
+<<<<<<< HEAD
                 // 播放失败（如无网络）→ 自动跳下一首；整单都失败则标记
                 handlePlaybackFailure();
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
                 notifyChanged();
             }
 
@@ -100,6 +121,7 @@ public class PlayerHolder {
     }
 
     public void playQueue(List<Track> tracks, int startIndex) {
+<<<<<<< HEAD
         consecutiveFailures = 0;
         allFailed = false;
         queue.clear();
@@ -124,6 +146,14 @@ public class PlayerHolder {
             ContextCompat.startForegroundService(appContext,
                     new Intent(appContext, PlaybackService.class));
         }
+=======
+        queue.clear();
+        queue.addAll(tracks);
+        index = Math.max(0, Math.min(startIndex, queue.size() - 1));
+        buildShuffleOrder();
+        loadCurrent();
+        player.play();
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         notifyChanged();
     }
 
@@ -162,11 +192,15 @@ public class PlayerHolder {
                 @Override
                 public void onError(String msg) {
                     main.post(() -> {
+<<<<<<< HEAD
                         if (currentTrack() == t) {
                             // 在线歌曲无法取到地址（多半无网络）→ 自动跳下一首
                             handlePlaybackFailure();
                             notifyChanged();
                         }
+=======
+                        if (currentTrack() == t) startPlay(t);
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
                     });
                 }
             });
@@ -314,6 +348,7 @@ public class PlayerHolder {
         notifyChanged();
     }
 
+<<<<<<< HEAD
     /** 单曲循环播放失败后最多重试次数，仍失败再停止/提示 */
     private static final int ONE_MODE_RETRY_LIMIT = 3;
 
@@ -341,6 +376,8 @@ public class PlayerHolder {
         return allFailed;
     }
 
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     public float getSpeed() {
         return speed;
     }

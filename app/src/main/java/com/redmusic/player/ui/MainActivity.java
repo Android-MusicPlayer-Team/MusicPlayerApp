@@ -1,9 +1,13 @@
 package com.redmusic.player.ui;
 
+<<<<<<< HEAD
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+=======
+import android.content.Intent;
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import android.os.Bundle;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -11,8 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+<<<<<<< HEAD
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import androidx.fragment.app.Fragment;
 
 import com.redmusic.player.R;
@@ -57,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         });
         updateMiniBar();
         selectTab(TAB_HOME);
+<<<<<<< HEAD
         requestNotifPermission();
     }
 
@@ -68,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
         }
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     }
 
     private void selectTab(int tab) {

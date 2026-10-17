@@ -14,7 +14,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+<<<<<<< HEAD
 import android.net.Uri;
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
@@ -39,11 +42,17 @@ import com.redmusic.player.R;
 import com.redmusic.player.api.MusicApi;
 import com.redmusic.player.model.LyricLine;
 import com.redmusic.player.model.Track;
+<<<<<<< HEAD
 import com.redmusic.player.util.PlaylistHelper;
 import com.redmusic.player.player.PlayerHolder;
 import com.redmusic.player.util.Prefs;
 
 import java.io.InputStream;
+=======
+import com.redmusic.player.player.PlayerHolder;
+import com.redmusic.player.util.Prefs;
+
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import java.util.List;
 
 public class PlayerActivity extends AppCompatActivity {
@@ -69,6 +78,7 @@ public class PlayerActivity extends AppCompatActivity {
     private ObjectAnimator rotateAnim;
     private Visualizer visualizer;
 
+<<<<<<< HEAD
     private boolean wasAllFailed = false;
     private final Runnable playerListener = () -> {
         refreshAll();
@@ -77,6 +87,9 @@ public class PlayerActivity extends AppCompatActivity {
         }
         wasAllFailed = PlayerHolder.get().isAllFailed();
     };
+=======
+    private final Runnable playerListener = this::refreshAll;
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     private final Runnable sleepTick = new Runnable() {
         @Override
         public void run() {
@@ -119,12 +132,15 @@ public class PlayerActivity extends AppCompatActivity {
         lyricToggle = findViewById(R.id.player_lyric_toggle);
         lyricView = findViewById(R.id.player_lyric_view);
         spectrum = findViewById(R.id.player_spectrum);
+<<<<<<< HEAD
         TextView addPlaylistBtn = findViewById(R.id.player_add_playlist);
         addPlaylistBtn.setOnClickListener(v -> {
             Track t = PlayerHolder.get().currentTrack();
             if (t == null) return;
             PlaylistHelper.addToPlaylist(this, t);
         });
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 
         rotateAnim = ObjectAnimator.ofFloat(cover, "rotation", 0f, 360f);
         rotateAnim.setDuration(20000);
@@ -152,8 +168,13 @@ public class PlayerActivity extends AppCompatActivity {
         shuffleBtn.setOnClickListener(v -> {
             PlayerHolder.get().cycleMode();
             int m = PlayerHolder.get().getPlayMode();
+<<<<<<< HEAD
             String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序播放"
                     : m == PlayerHolder.MODE_ONE ? "单曲循环" : "随机播放";
+=======
+            String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序撔"
+                    : m == PlayerHolder.MODE_ONE ? "单曲徎" : "随机撔";
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
             Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
             refreshControls();
         });
@@ -432,18 +453,25 @@ public class PlayerActivity extends AppCompatActivity {
     /** 已加载歌词的歌曲 id，切歌时才重新求歌词，避免重复网络请求 */
     private String lyricTrackId = null;
 
+<<<<<<< HEAD
     /** 当前歌曲变化时重新拉取歌词；同一首歌不重复请求 */
+=======
+    /** 当前歌曲变化时重新拉取歌词；同一首歌不重复请求*/
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     private void loadLyricsForCurrentTrack() {
         Track t = PlayerHolder.get().currentTrack();
         if (t == null) return;
         if (t.id != null && t.id.equals(lyricTrackId)) return;
         lyricTrackId = t.id;
+<<<<<<< HEAD
 
         // 本地歌曲：优先读同目录的 .lrc 歌词文件
         if (t.lyricFile != null && !t.lyricFile.isEmpty()) {
             loadLocalLrc(t.lyricFile);
             return;
         }
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         MusicApi.loadLyrics(t, new MusicApi.LyricCallback() {
             @Override
             public void onSuccess(List<LyricLine> lines) {
@@ -464,6 +492,7 @@ public class PlayerActivity extends AppCompatActivity {
         });
     }
 
+<<<<<<< HEAD
     /** 读取本地 .lrc 歌词文件并显示 */
     private void loadLocalLrc(String fileUri) {
         try {
@@ -497,6 +526,8 @@ public class PlayerActivity extends AppCompatActivity {
         });
     }
 
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);

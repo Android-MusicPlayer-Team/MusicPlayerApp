@@ -24,7 +24,10 @@ import com.redmusic.player.R;
 import com.redmusic.player.api.MusicApi;
 import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
+<<<<<<< HEAD
 import com.redmusic.player.util.PlaylistHelper;
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 import com.redmusic.player.util.Prefs;
 
 import java.util.ArrayList;
@@ -73,12 +76,15 @@ public class SearchFragment extends Fragment {
                 Prefs.toggleFav(t);
                 Toast.makeText(getContext(), Prefs.isFav(t) ? "已收藏" : "已取消收藏", Toast.LENGTH_SHORT).show();
             }
+<<<<<<< HEAD
 
             @Override
             public void onLongPress(Track t) {
                 // 长按网络歌曲 → 加入歌单
                 if (getContext() != null) PlaylistHelper.addToPlaylist(getContext(), t);
             }
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
         });
         RecyclerView list = view.findViewById(R.id.search_list);
         list.setLayoutManager(new LinearLayoutManager(getContext()));

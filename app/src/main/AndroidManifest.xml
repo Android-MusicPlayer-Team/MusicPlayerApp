@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<<<<<<< HEAD
     <!-- 后台播放前台服务 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
@@ -15,6 +16,8 @@
     <uses-permission
         android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
 
     <application
         android:name=".App"
@@ -39,10 +42,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+<<<<<<< HEAD
 
         <service
             android:name=".player.PlaybackService"
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
+=======
+>>>>>>> 97fccea04fcf013b06e6098484e14b10262d18bb
     </application>
 </manifest>
