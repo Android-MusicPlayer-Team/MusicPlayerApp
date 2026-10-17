@@ -1,0 +1,539 @@
+package com.redmusic.player.ui;
+
+import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.media.audiofx.Visualizer;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.net.Uri;
+import android.view.View;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.palette.graphics.Palette;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.redmusic.player.R;
+import com.redmusic.player.api.MusicApi;
+import com.redmusic.player.model.LyricLine;
+import com.redmusic.player.model.Track;
+import com.redmusic.player.util.PlaylistHelper;
+import com.redmusic.player.player.PlayerHolder;
+import com.redmusic.player.util.Prefs;
+
+import java.io.InputStream;
+import java.util.List;
+
+public class PlayerActivity extends AppCompatActivity {
+
+    private static final int REQ_AUDIO = 100;
+
+    private final Handler main = new Handler(Looper.getMainLooper());
+    private final Runnable progressTick = new Runnable() {
+        @Override
+        public void run() {
+            updateProgress();
+            main.postDelayed(this, 50);
+        }
+    };
+
+    private ImageView cover, bgBlur;
+    private View bgGradient, cdContainer;
+    private TextView title, artist, curTime, totalTime, fullTime, lyricLine, speedBtn, timerBtn, lyricToggle;
+    private SeekBar seekBar;
+    private ImageButton shuffleBtn, prevBtn, playBtn, nextBtn, repeatBtn, favBtn, modeBtn, playlistBtn;
+    private LyricView lyricView;
+    private SpectrumView spectrum;
+    private ObjectAnimator rotateAnim;
+    private Visualizer visualizer;
+
+    private boolean wasAllFailed = false;
+    private final Runnable playerListener = () -> {
+        refreshAll();
+        if (PlayerHolder.get().isAllFailed() && !wasAllFailed) {
+            Toast.makeText(this, "无网络，无法播放该歌单，请检查网络", Toast.LENGTH_LONG).show();
+        }
+        wasAllFailed = PlayerHolder.get().isAllFailed();
+    };
+    private final Runnable sleepTick = new Runnable() {
+        @Override
+        public void run() {
+            if (sleepAt > 0 && System.currentTimeMillis() >= sleepAt) {
+                sleepAt = 0;
+                PlayerHolder.get().getPlayer().pause();
+                timerBtn.setText("睡眠");
+                Toast.makeText(PlayerActivity.this, "定时已到，播放已暂停", Toast.LENGTH_SHORT).show();
+            }
+            main.postDelayed(this, 1000);
+        }
+    };
+    private long sleepAt = 0;
+    private boolean endWarned = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_player);
+
+        cover = findViewById(R.id.player_cover);
+        bgBlur = findViewById(R.id.player_bg_blur);
+        bgGradient = findViewById(R.id.player_bg_gradient);
+        cdContainer = findViewById(R.id.player_cd_container);
+        title = findViewById(R.id.player_title);
+        artist = findViewById(R.id.player_artist);
+        curTime = findViewById(R.id.player_cur_time);
+        totalTime = findViewById(R.id.player_total_time);
+        fullTime = findViewById(R.id.player_full_time);
+        lyricLine = findViewById(R.id.player_lyric_line);
+        seekBar = findViewById(R.id.player_seek);
+        shuffleBtn = findViewById(R.id.player_mode);
+        prevBtn = findViewById(R.id.player_prev);
+        playBtn = findViewById(R.id.player_play);
+        nextBtn = findViewById(R.id.player_next);
+        repeatBtn = findViewById(R.id.player_playlist);
+        favBtn = findViewById(R.id.player_fav);
+        speedBtn = findViewById(R.id.player_speed);
+        timerBtn = findViewById(R.id.player_timer);
+        lyricToggle = findViewById(R.id.player_lyric_toggle);
+        lyricView = findViewById(R.id.player_lyric_view);
+        spectrum = findViewById(R.id.player_spectrum);
+        TextView addPlaylistBtn = findViewById(R.id.player_add_playlist);
+        addPlaylistBtn.setOnClickListener(v -> {
+            Track t = PlayerHolder.get().currentTrack();
+            if (t == null) return;
+            PlaylistHelper.addToPlaylist(this, t);
+        });
+
+        rotateAnim = ObjectAnimator.ofFloat(cover, "rotation", 0f, 360f);
+        rotateAnim.setDuration(20000);
+        rotateAnim.setRepeatCount(ValueAnimator.INFINITE);
+        rotateAnim.setInterpolator(new LinearInterpolator());
+
+        findViewById(R.id.player_back).setOnClickListener(v -> finish());
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    PlayerHolder.get().seekTo(progress);
+                    curTime.setText(fmt(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
+        shuffleBtn.setOnClickListener(v -> {
+            PlayerHolder.get().cycleMode();
+            int m = PlayerHolder.get().getPlayMode();
+            String msg = m == PlayerHolder.MODE_SEQUENCE ? "顺序播放"
+                    : m == PlayerHolder.MODE_ONE ? "单曲循环" : "随机播放";
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+            refreshControls();
+        });
+        prevBtn.setOnClickListener(v -> PlayerHolder.get().prev());
+        playBtn.setOnClickListener(v -> PlayerHolder.get().playPause());
+        nextBtn.setOnClickListener(v -> PlayerHolder.get().next(false));
+        repeatBtn.setOnClickListener(v -> new PlaylistDialog(this).show());
+        favBtn.setOnClickListener(v -> {
+            Track t = PlayerHolder.get().currentTrack();
+            if (t == null) return;
+            Prefs.toggleFav(t);
+            updateFav();
+            Toast.makeText(this, Prefs.isFav(t) ? "已收藏" : "已取消收藏", Toast.LENGTH_SHORT).show();
+        });
+        speedBtn.setOnClickListener(v -> {
+            PlayerHolder ph = PlayerHolder.get();
+            float s = ph.getSpeed();
+            float next = s >= 1.99f ? 0.5f : s + 0.25f;
+            if (s >= 1.99f) next = 0.5f;
+            else if (s >= 1.74f) next = 2.0f;
+            else next = s + 0.25f;
+            ph.setSpeed(next);
+            speedBtn.setText(String.format("%.2fx", next));
+        });
+        timerBtn.setOnClickListener(v -> showTimerDialog());
+        lyricToggle.setOnClickListener(v -> {
+            boolean fs = !lyricView.isFullScreen();
+            lyricView.setFullScreen(fs);
+            if (fs) {
+                cover.setVisibility(View.INVISIBLE);
+                cdContainer.setVisibility(View.INVISIBLE);
+                spectrum.setVisibility(View.INVISIBLE);
+                lyricLine.setVisibility(View.GONE);
+                lyricView.setVisibility(View.VISIBLE);
+                lyricToggle.setText("封面");
+            } else {
+                cover.setVisibility(View.VISIBLE);
+                cdContainer.setVisibility(View.VISIBLE);
+                spectrum.setVisibility(View.VISIBLE);
+                lyricLine.setVisibility(View.VISIBLE);
+                lyricView.setVisibility(View.GONE);
+                lyricToggle.setText("歌词");
+            }
+        });
+
+        requestAudioPermission();
+        main.post(progressTick);
+        main.post(sleepTick);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PlayerHolder.get().addListener(playerListener);
+        refreshAll();
+        main.post(progressTick);
+        updateSpectrumMode();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        PlayerHolder.get().removeListener(playerListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        main.removeCallbacks(progressTick);
+        main.removeCallbacks(sleepTick);
+        releaseVisualizer();
+    }
+
+    private void requestAudioPermission() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.RECORD_AUDIO}, REQ_AUDIO);
+            } else {
+                setupVisualizer();
+            }
+        } else {
+            setupVisualizer();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_AUDIO) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                setupVisualizer();
+            } else {
+                spectrum.startAnim();
+            }
+        }
+    }
+
+    private void setupVisualizer() {
+        try {
+            releaseVisualizer();
+            visualizer = new Visualizer(PlayerHolder.get().getAudioSessionId());
+            int[] range = Visualizer.getCaptureSizeRange();
+            visualizer.setCaptureSize(Math.min(range[1], 256));
+            visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+                @Override
+                public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+                    spectrum.setWaveform(waveform);
+                }
+
+                @Override
+                public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {
+                }
+            }, Visualizer.getMaxCaptureRate() / 2, true, false);
+            visualizer.setEnabled(true);
+        } catch (Exception e) {
+            spectrum.startAnim();
+        }
+    }
+
+    private void releaseVisualizer() {
+        if (visualizer != null) {
+            try {
+                visualizer.setEnabled(false);
+                visualizer.release();
+            } catch (Exception ignored) {
+            }
+            visualizer = null;
+        }
+    }
+
+    private void updateSpectrumMode() {
+        PlayerHolder ph = PlayerHolder.get();
+        if (ph.isPlaying()) {
+            spectrum.startAnim();
+        } else {
+            spectrum.stopAnim();
+        }
+    }
+
+    private void refreshAll() {
+        PlayerHolder ph = PlayerHolder.get();
+        Track t = ph.currentTrack();
+        if (t == null) {
+            cover.setImageResource(R.drawable.ic_music_note);
+            title.setText("朜撔");
+            artist.setText("");
+            lyricLine.setText("");
+            return;
+        }
+        title.setText(t.displayTitle());
+        artist.setText(t.displayArtist() + (t.album != null && !t.album.isEmpty() ? " · " + t.album : ""));
+        endWarned = false;
+        if (t.artworkUrl != null && !t.artworkUrl.isEmpty()) {
+            RequestOptions opts = new RequestOptions()
+                    .placeholder(R.drawable.ic_music_note)
+                    .transform(new CircleCrop());
+            Glide.with(this).load(t.artworkUrl).apply(opts).into(cover);
+            Glide.with(this).load(t.artworkUrl)
+                    .into(new CustomTarget<android.graphics.drawable.Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, Transition<? super Drawable> transition) {
+                            bgBlur.setImageDrawable(resource);
+                            if (resource instanceof BitmapDrawable) {
+                                Bitmap bmp = ((BitmapDrawable) resource).getBitmap();
+                                if (bmp != null) {
+                                    try {
+                                        Palette.from(bmp).generate(p -> {
+                                            if (p != null) {
+                                                int c = p.getVibrantColor(0xFFC20C0C);
+                                                applyBg(c);
+                                            }
+                                        });
+                                    } catch (Exception ignored) {
+                                    }
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onLoadCleared(Drawable placeholder) {
+                        }
+                    });
+        } else {
+            cover.setImageResource(R.drawable.ic_music_note);
+            applyBg(0xFFC20C0C);
+        }
+        updateFav();
+        refreshControls();
+        updateProgress();
+        updateSpectrumMode();
+
+        // 封面旋转
+        if (rotateAnim != null && !rotateAnim.isRunning() && ph.isPlaying()) {
+            rotateAnim.start();
+        }
+        if (ph.isPlaying() && rotateAnim != null && rotateAnim.isPaused()) {
+            rotateAnim.resume();
+        }
+        if (!ph.isPlaying() && rotateAnim != null && rotateAnim.isRunning()) {
+            rotateAnim.pause();
+        }
+        // 当前歌曲变化（切歌）时自动重新加载歌曲 */
+        loadLyricsForCurrentTrack();
+    }
+
+    private void applyBg(int color) {
+        // 柔和深色渐变，不用封面模糊模糊水 */
+        GradientDrawable gd = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{0xFF2B2F3A, 0xFF1A1A22});
+        gd.setCornerRadius(0);
+        bgGradient.setBackground(gd);
+    }
+
+    private void updateFav() {
+        Track t = PlayerHolder.get().currentTrack();
+        if (t == null) return;
+        boolean fav = Prefs.isFav(t);
+        favBtn.setImageResource(fav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
+    }
+
+    private void refreshControls() {
+        PlayerHolder ph = PlayerHolder.get();
+        playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
+        int m = ph.getPlayMode();
+        if (m == PlayerHolder.MODE_ONE) {
+            shuffleBtn.setImageResource(R.drawable.ic_repeat_one);
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
+        } else if (m == PlayerHolder.MODE_SHUFFLE) {
+            shuffleBtn.setImageResource(R.drawable.ic_shuffle);
+            shuffleBtn.setColorFilter(0xFFFFFFFF);
+        } else {
+            shuffleBtn.setImageResource(R.drawable.ic_repeat);
+            shuffleBtn.setColorFilter(0xFFAAAAAA);
+        }
+        repeatBtn.setImageResource(R.drawable.ic_playlist);
+        repeatBtn.setColorFilter(0xFFDDDDDD);
+    }
+
+    private void updateProgress() {
+        PlayerHolder ph = PlayerHolder.get();
+        long pos = ph.getPosition();
+        long dur = ph.getDuration();
+        Track t = ph.currentTrack();
+        if (dur <= 0) {
+            seekBar.setMax(1000);
+            seekBar.setProgress(0);
+            curTime.setText(fmt(pos));
+            totalTime.setText("--:--");
+            fullTime.setText("");
+        } else {
+            seekBar.setMax((int) dur);
+            seekBar.setProgress((int) pos);
+            curTime.setText(fmt(pos));
+            totalTime.setText(fmt(dur));
+            // 网易云为完整歌曲，不显示试听提示
+            fullTime.setText("");
+        }
+        lyricView.updatePosition(pos);
+        // 当前歌词行显示
+        if (t != null && currentLines != null && !currentLines.isEmpty()) {
+            String line = "";
+            for (LyricLine l : currentLines) {
+                if (pos >= l.timeMs) line = l.text;
+            }
+            lyricLine.setText(line);
+        } else {
+            lyricLine.setText("");
+        }
+    }
+
+    private List<LyricLine> currentLines;
+    /** 已加载歌词的歌曲 id，切歌时才重新求歌词，避免重复网络请求 */
+    private String lyricTrackId = null;
+
+    /** 当前歌曲变化时重新拉取歌词；同一首歌不重复请求 */
+    private void loadLyricsForCurrentTrack() {
+        Track t = PlayerHolder.get().currentTrack();
+        if (t == null) return;
+        if (t.id != null && t.id.equals(lyricTrackId)) return;
+        lyricTrackId = t.id;
+
+        // 本地歌曲：优先读同目录的 .lrc 歌词文件
+        if (t.lyricFile != null && !t.lyricFile.isEmpty()) {
+            loadLocalLrc(t.lyricFile);
+            return;
+        }
+        MusicApi.loadLyrics(t, new MusicApi.LyricCallback() {
+            @Override
+            public void onSuccess(List<LyricLine> lines) {
+                runOnUiThread(() -> {
+                    currentLines = lines;
+                    lyricView.setLines(lines);
+                    lyricView.updatePosition(PlayerHolder.get().getPosition());
+                });
+            }
+
+            @Override
+            public void onError(String msg) {
+                runOnUiThread(() -> {
+                    currentLines = null;
+                    lyricView.setLines(null);
+                });
+            }
+        });
+    }
+
+    /** 读取本地 .lrc 歌词文件并显示 */
+    private void loadLocalLrc(String fileUri) {
+        try {
+            InputStream in = getContentResolver().openInputStream(Uri.parse(fileUri));
+            if (in == null) {
+                clearLyrics();
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            byte[] buf = new byte[4096];
+            int n;
+            while ((n = in.read(buf)) != -1) {
+                sb.append(new String(buf, 0, n, "UTF-8"));
+            }
+            in.close();
+            List<LyricLine> lines = LyricLine.parse(sb.toString());
+            runOnUiThread(() -> {
+                currentLines = lines;
+                lyricView.setLines(lines);
+                lyricView.updatePosition(PlayerHolder.get().getPosition());
+            });
+        } catch (Exception e) {
+            clearLyrics();
+        }
+    }
+
+    private void clearLyrics() {
+        runOnUiThread(() -> {
+            currentLines = null;
+            lyricView.setLines(null);
+        });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        // 窗口重新获得焦点（从后台切回）时，歌词与当前歌曲一致：        loadLyricsForCurrentTrack();
+    }
+
+    private void showTimerDialog() {
+        String[] options = {"15 分钟", "30 分钟", "60 分钟", "取消定时"};
+        android.app.AlertDialog.Builder b = new android.app.AlertDialog.Builder(this);
+        b.setTitle("睡眠定时");
+        b.setItems(options, (d, which) -> {
+            if (which == 0) {
+                sleepAt = System.currentTimeMillis() + 15 * 60000L;
+                timerBtn.setText("15分钟后停止");
+            } else if (which == 1) {
+                sleepAt = System.currentTimeMillis() + 30 * 60000L;
+                timerBtn.setText("30分钟后停止");
+            } else if (which == 2) {
+                sleepAt = System.currentTimeMillis() + 60 * 60000L;
+                timerBtn.setText("60分钟后停止");
+            } else {
+                sleepAt = 0;
+                timerBtn.setText("睡眠");
+            }
+            if (sleepAt > 0) {
+                Toast.makeText(this, "已设置睡眠定时", Toast.LENGTH_SHORT).show();
+            }
+        });
+        b.show();
+    }
+
+    private String fmt(long ms) {
+        long s = ms / 1000;
+        return String.format("%d:%02d", s / 60, s % 60);
+    }
+
+    private int dp(int v) {
+        return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
+    }
+}
