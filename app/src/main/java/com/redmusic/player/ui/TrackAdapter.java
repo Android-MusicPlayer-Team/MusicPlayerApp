@@ -17,6 +17,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.redmusic.player.R;
 import com.redmusic.player.model.Track;
 import com.redmusic.player.util.Prefs;
+import com.redmusic.player.util.ThemeManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +93,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         if (rankMode) {
             h.rank.setVisibility(View.VISIBLE);
             h.rank.setText(String.valueOf(t.rank > 0 ? t.rank : position + 1));
-            h.rank.setTextColor(position < 3 ? 0xFFC20C0C : 0xFF888888);
+            h.rank.setTextColor(position < 3 ? ThemeManager.primaryColor(h.rank.getContext()) : 0xFF888888);
         } else {
             h.rank.setVisibility(View.GONE);
         }
@@ -100,7 +101,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         h.fav.setVisibility(View.VISIBLE);
         boolean isFav = Prefs.isFav(t);
         h.fav.setImageResource(isFav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-        h.fav.setColorFilter(0xFFC20C0C);
+        h.fav.setColorFilter(isFav ? ThemeManager.primaryColor(h.fav.getContext()) : 0xFF888888);
         h.itemView.setOnClickListener(v -> {
             if (action != null) action.onPlay(position);
         });

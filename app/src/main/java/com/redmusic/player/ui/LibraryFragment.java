@@ -34,6 +34,7 @@ import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
 import com.redmusic.player.util.PlaylistHelper;
 import com.redmusic.player.util.Prefs;
+import com.redmusic.player.util.ThemeManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -91,6 +92,15 @@ public class LibraryFragment extends Fragment {
         actionBack = view.findViewById(R.id.action_back);
         emptyTip = view.findViewById(R.id.lib_empty);
         list = view.findViewById(R.id.lib_list);
+
+        // 标题与操作按钮跟随皮肤主色
+        int primary = ThemeManager.primaryColor(requireContext());
+        ((TextView) view.findViewById(R.id.library_title)).setTextColor(primary);
+        actionScan.setTextColor(primary);
+        actionNew.setTextColor(primary);
+        actionAdd.setTextColor(primary);
+        actionDel.setTextColor(primary);
+        actionBack.setTextColor(primary);
 
         trackAdapter = new TrackAdapter(false, true);
         trackAdapter.setAction(new TrackAdapter.OnAction() {
@@ -157,7 +167,7 @@ public class LibraryFragment extends Fragment {
     }
 
     private void updateTabColors() {
-        int red = 0xFFC20C0C;
+        int red = ThemeManager.primaryColor(requireContext());
         int gray = 0xFFAAAAAA;
         tabFav.setTextColor(currentTab == TAB_FAV ? red : gray);
         tabRecent.setTextColor(currentTab == TAB_RECENT ? red : gray);
