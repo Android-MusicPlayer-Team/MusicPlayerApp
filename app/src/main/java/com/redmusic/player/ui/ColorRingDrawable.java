@@ -15,11 +15,12 @@ public class ColorRingDrawable extends Drawable {
     private final Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final int[] hueColors;
     private boolean selected;
+    private final int bgColor;
 
-    public ColorRingDrawable() {
+    public ColorRingDrawable(int bgColor) {
+        this.bgColor = bgColor;
         hueColors = new int[361];
         for (int i = 0; i <= 360; i++) hueColors[i] = Color.HSVToColor(new float[]{i, 1f, 1f});
-        holePaint.setColor(0x00000000);
     }
 
     public void setSelected(boolean sel) {
@@ -42,11 +43,9 @@ public class ColorRingDrawable extends Drawable {
         canvas.drawCircle(cx, cy, r, ringPaint);
         ringPaint.setShader(null);
 
-        // 中间挖空（dst 清除）
-        holePaint.setColor(0x00000000);
-        holePaint.setXfermode(new android.graphics.PorterDuffXfermode(android.graphics.PorterDuff.Mode.CLEAR));
+        // 中间用背景色填充，形成环形
+        holePaint.setColor(bgColor);
         canvas.drawCircle(cx, cy, innerR, holePaint);
-        holePaint.setXfermode(null);
 
         // 选中白描边
         if (selected) {

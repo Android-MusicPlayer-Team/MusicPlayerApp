@@ -90,7 +90,8 @@ public class SettingsFragment extends Fragment {
                 skinViews[i].setBackground(gd);
             } else {
                 // 自定义入口：彩色色环（不固定单色）
-                ColorRingDrawable ring = new ColorRingDrawable();
+                ColorRingDrawable ring = new ColorRingDrawable(
+                        ThemeManager.backgroundColor(requireContext()));
                 ring.setSelected(i == cur);
                 skinViews[i].setBackground(ring);
             }
