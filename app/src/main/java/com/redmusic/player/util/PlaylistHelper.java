@@ -2,28 +2,36 @@ package com.redmusic.player.util;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.text.InputType;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.redmusic.player.model.Playlist;
 import com.redmusic.player.model.Track;
 
 import java.util.List;
+import java.util.UUID;
 
 /** 歌单通用操作：把任意歌曲（导入的本地歌 / 搜索的网络歌）加入某个歌单 */
 public class PlaylistHelper {
 
-    /** 弹窗让用户选择一个歌单，把 t 加进去 */
+    /** 弹窗让用户选择一个歌单，把 t 加进去；没歌单时可在这里直接新建 */
     public static void addToPlaylist(Context ctx, Track t) {
         List<Playlist> pls = Prefs.getPlaylists();
         if (pls.isEmpty()) {
-            Toast.makeText(ctx, "还没有歌单，请先在\"我的 - 歌单\"里新建", Toast.LENGTH_LONG).show();
+            showCreateDialog(ctx, t);
             return;
         }
-        String[] names = new String[pls.size()];
+        String[] names = new String[pls.size() + 1];
         for (int i = 0; i < pls.size(); i++) names[i] = pls.get(i).name;
+        names[pls.size()] = "＋ 新建歌单";
         new AlertDialog.Builder(ctx)
                 .setTitle("加入歌单：" + t.displayTitle())
                 .setItems(names, (d, w) -> {
+                    if (w == pls.size()) {
+                        showCreateDialog(ctx, t);
+                        return;
+                    }
                     Playlist p = pls.get(w);
                     if (!addNoSave(p, t)) {
                         Toast.makeText(ctx, "已在歌单中", Toast.LENGTH_SHORT).show();
@@ -32,6 +40,31 @@ public class PlaylistHelper {
                     save(p);
                     Toast.makeText(ctx, "已加入歌单 " + p.name, Toast.LENGTH_SHORT).show();
                 })
+                .show();
+    }
+
+    /** 新建歌单并直接把当前歌曲加入 */
+    private static void showCreateDialog(Context ctx, Track t) {
+        EditText input = new EditText(ctx);
+        input.setHint("歌单名称");
+        input.setSingleLine(true);
+        new AlertDialog.Builder(ctx)
+                .setTitle("新建歌单")
+                .setView(input)
+                .setPositiveButton("创建并加入", (d, w) -> {
+                    String name = input.getText().toString().trim();
+                    if (name.isEmpty()) {
+                        Toast.makeText(ctx, "请输入歌单名称", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Playlist np = new Playlist(UUID.randomUUID().toString(), name);
+                    np.tracks.add(t);
+                    List<Playlist> pls = Prefs.getPlaylists();
+                    pls.add(np);
+                    Prefs.savePlaylists(pls);
+                    Toast.makeText(ctx, "已创建歌单 " + name + " 并加入歌曲", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("取消", null)
                 .show();
     }
 

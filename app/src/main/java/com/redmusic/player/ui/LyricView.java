@@ -45,10 +45,11 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 歌词颜色随日夜：夜间白色，白天深色（配合播放页背景）
+        // 歌词颜色随日夜：夜间白色，白天深色（配合播放页背景）；当前行高亮用主题主色
         boolean dark = com.redmusic.player.util.ThemeManager.isDark(getContext());
         int fg = dark ? 0xFFFFFFFF : 0xFF33363D;
-        activePaint.setColor(fg);
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        activePaint.setColor(pc);
         activePaint.setFakeBoldText(true);
         activePaint.setTextAlign(Paint.Align.CENTER);
         normalPaint.setColor(fg);
