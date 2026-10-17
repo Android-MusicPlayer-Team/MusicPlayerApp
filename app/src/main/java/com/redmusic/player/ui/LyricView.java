@@ -2,7 +2,9 @@ package com.redmusic.player.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -193,16 +195,21 @@ public class LyricView extends View {
             String text = lines.get(i).text;
 
             if (isCur) {
-                // 当前行：纯白、稍大、圆角胶囊底
+                // 当前行：文字中间为主题色、向两边减淡到普通歌词色（无胶囊背景）
                 activePaint.setAlpha(255);
                 float w = activePaint.measureText(text);
-                float pad = dp(16);
-                float left = getWidth() / 2f - w / 2f - pad;
-                float right = getWidth() / 2f + w / 2f + pad;
-                canvas.drawRoundRect(left, y - lineHeight / 2f + dp(4),
-                        right, y + lineHeight / 2f - dp(4), dp(18), dp(18), activeBack);
+                float left = getWidth() / 2f - w / 2f;
+                float right = getWidth() / 2f + w / 2f;
+                int fg = ThemeManager.isDark(getContext()) ? 0xFFFFFFFF : 0xFF33363D;
+                int pc = ThemeManager.primaryColor(getContext());
+                activePaint.setShader(new LinearGradient(
+                        left, 0f, right, 0f,
+                        new int[]{fg, pc, pc, pc, fg},
+                        new float[]{0f, 0.28f, 0.5f, 0.72f, 1f},
+                        Shader.TileMode.CLAMP));
                 Paint.FontMetrics fm = activePaint.getFontMetrics();
                 canvas.drawText(text, getWidth() / 2f, y - (fm.ascent + fm.descent) / 2f, activePaint);
+                activePaint.setShader(null);
             } else {
                 // 上下行：距离越远越淡
                 int alpha;
