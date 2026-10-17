@@ -289,8 +289,9 @@ public class LibraryFragment extends Fragment {
         });
         refreshFolderList(path, adapter);
         dlg.show();
-        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     private void refreshFolderList(TextView path, ArrayAdapter<String> adapter) {
@@ -406,8 +407,9 @@ public class LibraryFragment extends Fragment {
                 .setNegativeButton("取消", null)
                 .create();
         d.show();
-        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        d.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     private void openPlaylistDetail(Playlist p) {

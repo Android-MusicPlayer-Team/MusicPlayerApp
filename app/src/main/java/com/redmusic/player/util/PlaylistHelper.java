@@ -67,8 +67,9 @@ public class PlaylistHelper {
                 .setNegativeButton("取消", null)
                 .create();
         d.show();
-        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
-                com.redmusic.player.util.ThemeManager.primaryColor(ctx));
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(ctx);
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        d.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     /** 按 id 去重后加入，返回是否真正加入 */
