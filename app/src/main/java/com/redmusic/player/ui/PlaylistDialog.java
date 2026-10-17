@@ -49,6 +49,7 @@ public class PlaylistDialog extends Dialog {
         boolean dark = ThemeManager.isDark(ctx);
         int text = ThemeManager.primaryTextColor(ctx);
         int sub = ThemeManager.secondaryTextColor(ctx);
+        int pc = ThemeManager.primaryColor(ctx);
 
         // 标题栏：左标题右退出（按这里才返回）
         LinearLayout titleBar = new LinearLayout(ctx);
@@ -100,7 +101,7 @@ public class PlaylistDialog extends Dialog {
 
             TextView idx = new TextView(ctx);
             idx.setText(i == cur ? "♪" : String.valueOf(i + 1));
-            idx.setTextColor(i == cur ? text : sub);
+            idx.setTextColor(i == cur ? pc : sub);
             idx.setTextSize(14);
             idx.setWidth(dp(ctx, 36));
             row.addView(idx);
@@ -111,7 +112,7 @@ public class PlaylistDialog extends Dialog {
             col.setLayoutParams(colLp);
             TextView name = new TextView(ctx);
             name.setText(t.displayTitle());
-            name.setTextColor(text);
+            name.setTextColor(i == cur ? pc : text);
             name.setTextSize(15);
             name.setSingleLine(true);
             name.setEllipsize(android.text.TextUtils.TruncateAt.END);
