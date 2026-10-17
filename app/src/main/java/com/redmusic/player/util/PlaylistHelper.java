@@ -48,10 +48,10 @@ public class PlaylistHelper {
         EditText input = new EditText(ctx);
         input.setHint("歌单名称");
         input.setSingleLine(true);
-        new AlertDialog.Builder(ctx)
+        final AlertDialog d = new AlertDialog.Builder(ctx)
                 .setTitle("新建歌单")
                 .setView(input)
-                .setPositiveButton("创建并加入", (d, w) -> {
+                .setPositiveButton("创建并加入", (dlg, w) -> {
                     String name = input.getText().toString().trim();
                     if (name.isEmpty()) {
                         Toast.makeText(ctx, "请输入歌单名称", Toast.LENGTH_SHORT).show();
@@ -65,7 +65,10 @@ public class PlaylistHelper {
                     Toast.makeText(ctx, "已创建歌单 " + name + " 并加入歌曲", Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        d.show();
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                com.redmusic.player.util.ThemeManager.primaryColor(ctx));
     }
 
     /** 按 id 去重后加入，返回是否真正加入 */

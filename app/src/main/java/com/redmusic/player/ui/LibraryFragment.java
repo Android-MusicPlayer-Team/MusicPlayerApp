@@ -289,6 +289,8 @@ public class LibraryFragment extends Fragment {
         });
         refreshFolderList(path, adapter);
         dlg.show();
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
     }
 
     private void refreshFolderList(TextView path, ArrayAdapter<String> adapter) {
@@ -387,10 +389,10 @@ public class LibraryFragment extends Fragment {
     private void showCreatePlaylist() {
         EditText et = new EditText(getContext());
         et.setHint("歌单名称");
-        new AlertDialog.Builder(getContext())
+        final AlertDialog d = new AlertDialog.Builder(getContext())
                 .setTitle("新建歌单")
                 .setView(et)
-                .setPositiveButton("创建", (d, w) -> {
+                .setPositiveButton("创建", (dlg, w) -> {
                     String name = et.getText().toString().trim();
                     if (name.isEmpty()) {
                         Toast.makeText(getContext(), "名称不能为空", Toast.LENGTH_SHORT).show();
@@ -402,7 +404,10 @@ public class LibraryFragment extends Fragment {
                     refresh();
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        d.show();
+        d.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
     }
 
     private void openPlaylistDetail(Playlist p) {
