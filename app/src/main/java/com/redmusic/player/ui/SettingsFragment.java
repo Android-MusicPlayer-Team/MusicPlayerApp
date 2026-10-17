@@ -19,7 +19,7 @@ import com.redmusic.player.util.ThemeManager;
 public class SettingsFragment extends Fragment {
 
     private View[] skinViews;
-    private TextView modeDay, modeNight, fontAuto, fontWhite, fontBlack;
+    private TextView modeDay, modeNight;
 
     @Nullable
     @Override
@@ -67,16 +67,8 @@ public class SettingsFragment extends Fragment {
             applyTheme();
         });
 
-        fontAuto = view.findViewById(R.id.font_auto);
-        fontWhite = view.findViewById(R.id.font_white);
-        fontBlack = view.findViewById(R.id.font_black);
-        fontAuto.setOnClickListener(v -> { Prefs.setInt("font_color", 0); refreshFontUi(); });
-        fontWhite.setOnClickListener(v -> { Prefs.setInt("font_color", 1); refreshFontUi(); });
-        fontBlack.setOnClickListener(v -> { Prefs.setInt("font_color", 2); refreshFontUi(); });
-
         refreshSkinUi();
         refreshModeUi();
-        refreshFontUi();
     }
 
     private void refreshSkinUi() {
@@ -111,13 +103,6 @@ public class SettingsFragment extends Fragment {
         boolean dark = ThemeManager.isDark(requireContext());
         highlight(modeDay, !dark);
         highlight(modeNight, dark);
-    }
-
-    private void refreshFontUi() {
-        int f = Prefs.getInt("font_color", 0);
-        highlight(fontAuto, f == 0);
-        highlight(fontWhite, f == 1);
-        highlight(fontBlack, f == 2);
     }
 
     private void highlight(TextView tv, boolean on) {

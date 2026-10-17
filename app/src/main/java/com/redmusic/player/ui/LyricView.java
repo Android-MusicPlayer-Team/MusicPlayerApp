@@ -45,13 +45,15 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 播放页固定深色背景：当前行白色加粗，其余白色，高亮背景淡白胶囊
-        activePaint.setColor(0xFFFFFFFF);
+        // 歌词颜色随日夜：夜间白色，白天深色（配合播放页背景）
+        boolean dark = com.redmusic.player.util.ThemeManager.isDark(getContext());
+        int fg = dark ? 0xFFFFFFFF : 0xFF33363D;
+        activePaint.setColor(fg);
         activePaint.setFakeBoldText(true);
         activePaint.setTextAlign(Paint.Align.CENTER);
-        normalPaint.setColor(0xFFFFFFFF);
+        normalPaint.setColor(fg);
         normalPaint.setTextAlign(Paint.Align.CENTER);
-        activeBack.setColor(0x22FFFFFF);
+        activeBack.setColor(dark ? 0x22FFFFFF : 0x22000000);
         applySizes();
     }
 
@@ -153,7 +155,8 @@ public class LyricView extends View {
         super.onDraw(canvas);
         if (lines == null || lines.isEmpty()) {
             Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-            p.setColor(0x66FFFFFF);
+            boolean dark = com.redmusic.player.util.ThemeManager.isDark(getContext());
+            p.setColor(dark ? 0x66FFFFFF : 0x66FF3336);
             p.setTextSize(dp(14));
             p.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("暂无歌词", getWidth() / 2f, getHeight() / 2f, p);
@@ -221,7 +224,8 @@ public class LyricView extends View {
         // 拖动歌词时：顶部显示目标时间提示
         if (dragging) {
             Paint tip = new Paint(Paint.ANTI_ALIAS_FLAG);
-            tip.setColor(0xFFFFFFFF);
+            boolean dark = com.redmusic.player.util.ThemeManager.isDark(getContext());
+            tip.setColor(dark ? 0xFFFFFFFF : 0xFF33363D);
             tip.setTextSize(dp(13));
             tip.setTextAlign(Paint.Align.CENTER);
             String t = fmtTime(previewPositionMs);

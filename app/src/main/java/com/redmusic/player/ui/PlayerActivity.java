@@ -138,7 +138,7 @@ public class PlayerActivity extends AppCompatActivity {
         rotateAnim.setInterpolator(new LinearInterpolator());
 
         android.widget.ImageButton backBtn = findViewById(R.id.player_back);
-        backBtn.setColorFilter(0xFFFFFFFF);
+        backBtn.setColorFilter(iconColor());
         backBtn.setOnClickListener(v -> finish());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -371,12 +371,21 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void applyBg(int color) {
-        // 播放页固定深色渐变背景（白色图标/文字始终清晰）
+        // 播放页背景随日夜：夜间深色渐变(白图标)，白天浅色渐变(深色图标/文字)
+        boolean dark = ThemeManager.isDark(this);
+        int[] colors = dark
+                ? new int[]{0xFF2B2F3A, 0xFF1A1A22}
+                : new int[]{0xFFF1F2F7, 0xFFDFE1EC};
         GradientDrawable gd = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
-                new int[]{0xFF2B2F3A, 0xFF1A1A22});
+                colors);
         gd.setCornerRadius(0);
         bgGradient.setBackground(gd);
+    }
+
+    /** 播放页图标颜色：夜间白色 / 白天深色（配合背景） */
+    private int iconColor() {
+        return ThemeManager.isDark(this) ? 0xFFFFFFFF : 0xFF33363D;
     }
 
     private void updateFav() {
@@ -384,29 +393,31 @@ public class PlayerActivity extends AppCompatActivity {
         if (t == null) return;
         boolean fav = Prefs.isFav(t);
         favBtn.setImageResource(fav ? R.drawable.ic_heart_filled : R.drawable.ic_heart);
-        favBtn.setColorFilter(fav ? ThemeManager.primaryColor(this) : 0x88FFFFFF);
+        int notFav = ThemeManager.isDark(this) ? 0x88FFFFFF : 0xAA555A66;
+        favBtn.setColorFilter(fav ? ThemeManager.primaryColor(this) : notFav);
     }
 
     private void refreshControls() {
         PlayerHolder ph = PlayerHolder.get();
-        // 播放页固定深色背景，图标固定白色（始终清晰可见）
+        // 播放页图标颜色随日夜（夜间白 / 白天深色）
+        int ic = iconColor();
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        playBtn.setColorFilter(0xFFFFFFFF);
-        prevBtn.setColorFilter(0xFFFFFFFF);
-        nextBtn.setColorFilter(0xFFFFFFFF);
+        playBtn.setColorFilter(ic);
+        prevBtn.setColorFilter(ic);
+        nextBtn.setColorFilter(ic);
         int m = ph.getPlayMode();
         if (m == PlayerHolder.MODE_ONE) {
             shuffleBtn.setImageResource(R.drawable.ic_repeat_one);
-            shuffleBtn.setColorFilter(0xFFFFFFFF);
+            shuffleBtn.setColorFilter(ic);
         } else if (m == PlayerHolder.MODE_SHUFFLE) {
             shuffleBtn.setImageResource(R.drawable.ic_shuffle);
-            shuffleBtn.setColorFilter(0xFFFFFFFF);
+            shuffleBtn.setColorFilter(ic);
         } else {
             shuffleBtn.setImageResource(R.drawable.ic_repeat);
-            shuffleBtn.setColorFilter(0xFFFFFFFF);
+            shuffleBtn.setColorFilter(ic);
         }
         repeatBtn.setImageResource(R.drawable.ic_playlist);
-        repeatBtn.setColorFilter(0xFFFFFFFF);
+        repeatBtn.setColorFilter(ic);
     }
 
     private void updateProgress() {

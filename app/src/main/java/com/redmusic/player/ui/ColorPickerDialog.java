@@ -41,17 +41,7 @@ public class ColorPickerDialog extends Dialog {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(pad, pad, pad, pad);
 
-        // 环形色相环
-        final HueRingView ring = new HueRingView(ctx);
-        ring.setLayoutParams(new LinearLayout.LayoutParams(dp(ctx, 250), dp(ctx, 250)));
-        ring.setHue(h);
-        ring.setOnHueChange(ht -> {
-            h = ht;
-            invalidateAll();
-        });
-        root.addView(ring);
-
-        // 方形 明度/饱和度 面板
+        // 方形 明度/饱和度 面板（先定义，供下方色环回调引用）
         final SVPanelView sv = new SVPanelView(ctx);
         sv.setLayoutParams(new LinearLayout.LayoutParams(dp(ctx, 250), dp(ctx, 160)));
         ((LinearLayout.LayoutParams) sv.getLayoutParams()).setMargins(0, dp(ctx, 10), 0, 0);
@@ -61,6 +51,17 @@ public class ColorPickerDialog extends Dialog {
             v = nv;
             invalidateAll();
         });
+
+        // 环形色相环（显示在明度/饱和度面板上方）
+        final HueRingView ring = new HueRingView(ctx);
+        ring.setLayoutParams(new LinearLayout.LayoutParams(dp(ctx, 250), dp(ctx, 250)));
+        ring.setHue(h);
+        ring.setOnHueChange(ht -> {
+            h = ht;
+            sv.setHSV(h, s, v); // 拖动色环，下方明度/饱和度面板随新色相变色
+            invalidateAll();
+        });
+        root.addView(ring);
         root.addView(sv);
 
         // H/S/V 数值 + 预览
