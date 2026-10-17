@@ -38,12 +38,16 @@ public class MiniPlayerBar extends LinearLayout {
     public void refresh() {
         PlayerHolder ph = PlayerHolder.get();
         Track t = ph.currentTrack();
+        // 图标颜色显式随日夜：夜间白 / 白天深，切换主题后始终刷新正确
+        int ic = ThemeManager.isDark(getContext()) ? 0xFFFFFFFF : 0xFF33363D;
         if (t == null) {
             title.setText("未在播放");
             artist.setText("去发现好音乐");
             cover.setImageResource(R.drawable.ic_music_note);
             playBtn.setImageResource(R.drawable.ic_play);
             playlistBtn.setImageResource(R.drawable.ic_playlist);
+            playBtn.setColorFilter(ic);
+            playlistBtn.setColorFilter(ic);
             return;
         }
         title.setText(t.displayTitle());
@@ -57,6 +61,7 @@ public class MiniPlayerBar extends LinearLayout {
             cover.setImageResource(R.drawable.ic_music_note);
         }
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        // 图标随白天/夜间自动切换（ic_*.xml 的 text_primary），任何主题都清晰可见
+        playBtn.setColorFilter(ic);
+        playlistBtn.setColorFilter(ic);
     }
 }
