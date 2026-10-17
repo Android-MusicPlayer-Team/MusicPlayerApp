@@ -24,7 +24,7 @@
                 android:id="@+id/home_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TuneTide"
+                android:text="@string/app_name"
                 android:textColor="#C20C0C"
                 android:textSize="24sp"
                 android:textStyle="bold" />
