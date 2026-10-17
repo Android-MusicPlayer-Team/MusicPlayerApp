@@ -178,7 +178,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:max="1000"
-            android:progressTint="@color/text_secondary"
+            android:progressDrawable="@drawable/bg_seek_progress"
             android:thumb="@drawable/seek_thumb" />
 
         <LinearLayout
