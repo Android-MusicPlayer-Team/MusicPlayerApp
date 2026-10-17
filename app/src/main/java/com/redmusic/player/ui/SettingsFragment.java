@@ -1,14 +1,11 @@
 package com.redmusic.player.ui;
 
-import android.content.ComponentName;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,13 +19,7 @@ import com.redmusic.player.util.ThemeManager;
 public class SettingsFragment extends Fragment {
 
     private View[] skinViews;
-    private View[] iconViews;
     private TextView modeDay, modeNight;
-
-    /** 桌面图标入口：与 AndroidManifest 中 Launcher* alias 一一对应（红/蓝/绿/紫/橙） */
-    private static final String[] ICON_ALIAS = {
-            ".LauncherRed", ".LauncherBlue", ".LauncherGreen", ".LauncherPurple", ".LauncherOrange"
-    };
 
     @Nullable
     @Override
@@ -76,50 +67,8 @@ public class SettingsFragment extends Fragment {
             applyTheme();
         });
 
-        iconViews = new View[]{
-                view.findViewById(R.id.icon_0),
-                view.findViewById(R.id.icon_1),
-                view.findViewById(R.id.icon_2),
-                view.findViewById(R.id.icon_3),
-                view.findViewById(R.id.icon_4)
-        };
-        for (int i = 0; i < iconViews.length; i++) {
-            final int idx = i;
-            iconViews[i].setOnClickListener(v -> {
-                Prefs.setInt("icon_idx", idx);
-                setLauncherIcon(idx);
-                refreshIconUi();
-                Toast.makeText(requireContext(), "图标已切换，返回桌面后生效", Toast.LENGTH_SHORT).show();
-            });
-        }
-
         refreshSkinUi();
         refreshModeUi();
-        refreshIconUi();
-    }
-
-    /** 切换桌面图标：启用选中的 Launcher* alias，禁用其余（重启/回桌面后生效） */
-    private void setLauncherIcon(int idx) {
-        PackageManager pm = requireContext().getPackageManager();
-        String pkg = requireContext().getPackageName();
-        for (int i = 0; i < ICON_ALIAS.length; i++) {
-            pm.setComponentEnabledSetting(
-                    new ComponentName(pkg, pkg + ICON_ALIAS[i]),
-                    i == idx ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                            : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP);
-        }
-    }
-
-    private void refreshIconUi() {
-        int cur = Prefs.getInt("icon_idx", 0);
-        for (int i = 0; i < iconViews.length; i++) {
-            GradientDrawable gd = new GradientDrawable();
-            gd.setShape(GradientDrawable.OVAL);
-            gd.setColor(ThemeManager.SKIN_COLORS[i]);
-            if (i == cur) gd.setStroke(dp(3), 0xFFFFFFFF);
-            iconViews[i].setBackground(gd);
-        }
     }
 
     private void refreshSkinUi() {

@@ -62,36 +62,6 @@
             android:layout_marginHorizontal="12dp" android:background="@android:color/transparent" />
     </LinearLayout>
 
-    <!-- 应用图标 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="28dp"
-        android:text="应用图标（回到桌面生效）"
-        android:textColor="@color/text_secondary"
-        android:textSize="13sp" />
-
-    <LinearLayout
-        android:id="@+id/icon_row"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <View android:id="@+id/icon_0" android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp" android:background="#C20C0C" />
-        <View android:id="@+id/icon_1" android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp" android:background="#1976D2" />
-        <View android:id="@+id/icon_2" android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp" android:background="#2E7D32" />
-        <View android:id="@+id/icon_3" android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp" android:background="#7B1FA2" />
-        <View android:id="@+id/icon_4" android:layout_width="40dp" android:layout_height="40dp"
-            android:layout_marginHorizontal="12dp" android:background="#F57C00" />
-    </LinearLayout>
-
     <!-- 白天/夜间 -->
     <TextView
         android:layout_width="wrap_content"
