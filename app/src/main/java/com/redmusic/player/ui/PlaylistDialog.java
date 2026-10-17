@@ -2,8 +2,8 @@ package com.redmusic.player.ui;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +19,10 @@ import com.redmusic.player.util.ThemeManager;
 
 import java.util.List;
 
-/** 底部弹出的播放列表面板：显示当前队列，可切歌、可删除（随白天/夜间主题） */
+/** 底部弹出的播放列表面板：显示当前队列，可切歌、可删除（删除后不关闭，按顶部才返回；随白天/夜间） */
 public class PlaylistDialog extends Dialog {
+
+    private final LinearLayout root;
 
     public PlaylistDialog(Context ctx) {
         super(ctx, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
@@ -28,13 +30,19 @@ public class PlaylistDialog extends Dialog {
         if (w != null) {
             w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             boolean dark = ThemeManager.isDark(ctx);
-            w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(
+            w.setBackgroundDrawable(new ColorDrawable(
                     dark ? 0xEE000000 : 0xEEF5F5F5));
         }
-        build(ctx);
+        root = new LinearLayout(ctx);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(ctx, 24), dp(ctx, 28), dp(ctx, 24), dp(ctx, 24));
+        setContentView(root);
+        refresh(ctx);
     }
 
-    private void build(Context ctx) {
+    /** 重建弹窗内容（删除歌曲后调用，不关闭弹窗） */
+    private void refresh(Context ctx) {
+        root.removeAllViews();
         PlayerHolder ph = PlayerHolder.get();
         List<Track> queue = ph.getQueue();
         int curPos = ph.getQueuePosition();
@@ -42,11 +50,7 @@ public class PlaylistDialog extends Dialog {
         int text = ThemeManager.primaryTextColor(ctx);
         int sub = ThemeManager.secondaryTextColor(ctx);
 
-        LinearLayout root = new LinearLayout(ctx);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(ctx, 24), dp(ctx, 28), dp(ctx, 24), dp(ctx, 24));
-
-        // 标题栏：左标题右退出
+        // 标题栏：左标题右退出（按这里才返回）
         LinearLayout titleBar = new LinearLayout(ctx);
         titleBar.setOrientation(LinearLayout.HORIZONTAL);
         titleBar.setGravity(Gravity.CENTER_VERTICAL);
@@ -121,6 +125,7 @@ public class PlaylistDialog extends Dialog {
             col.addView(artist);
             row.addView(col);
 
+            // 删除：只删这一首，弹窗不关闭，按顶部 ✕ 才返回
             TextView del = new TextView(ctx);
             del.setText("✕");
             del.setTextColor(sub);
@@ -130,7 +135,7 @@ public class PlaylistDialog extends Dialog {
             del.setOnClickListener(v -> {
                 ph.removeAt(pos);
                 Toast.makeText(ctx, "已移除", Toast.LENGTH_SHORT).show();
-                dismiss();
+                refresh(ctx);
             });
             row.addView(del);
 
@@ -145,8 +150,6 @@ public class PlaylistDialog extends Dialog {
 
         sv.addView(list);
         root.addView(sv);
-
-        setContentView(root);
     }
 
     private int dp(Context c, int v) {

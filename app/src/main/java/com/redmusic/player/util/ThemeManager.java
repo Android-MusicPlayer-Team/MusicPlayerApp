@@ -45,11 +45,8 @@ public class ThemeManager {
                 : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
-    /** 主文字颜色（设置里可选：跟随主题 / 白色 / 黑色） */
+    /** 主文字颜色（跟随白天/夜间） */
     public static int primaryTextColor(Context c) {
-        int f = Prefs.getInt("font_color", 0);
-        if (f == 1) return 0xFFFFFFFF;
-        if (f == 2) return 0xFF212121;
         return isDark(c) ? 0xFFFFFFFF : 0xFF212121;
     }
 
