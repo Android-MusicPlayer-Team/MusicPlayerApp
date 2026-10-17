@@ -43,6 +43,7 @@ public class MiniPlayerBar extends LinearLayout {
             artist.setText("去发现好音乐");
             cover.setImageResource(R.drawable.ic_music_note);
             playBtn.setImageResource(R.drawable.ic_play);
+            playlistBtn.setImageResource(R.drawable.ic_playlist);
             return;
         }
         title.setText(t.displayTitle());
