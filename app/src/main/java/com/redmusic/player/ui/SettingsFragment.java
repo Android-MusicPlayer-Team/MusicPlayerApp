@@ -30,10 +30,8 @@ public class SettingsFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        // 独立设置页返回（退出）
-        android.widget.ImageButton backBtn = view.findViewById(R.id.settings_back);
-        backBtn.setColorFilter(ThemeManager.primaryTextColor(requireContext()));
-        backBtn.setOnClickListener(v -> {
+        // 独立设置页返回（退出）；颜色由 ic_arrow_back 的 text_primary 资源随黑白自动切换
+        view.findViewById(R.id.settings_back).setOnClickListener(v -> {
             if (getActivity() != null) getActivity().finish();
         });
 
@@ -84,16 +82,18 @@ public class SettingsFragment extends Fragment {
     private void refreshSkinUi() {
         int cur = Prefs.getInt("skin_idx", 0);
         for (int i = 0; i < skinViews.length; i++) {
-            GradientDrawable gd = new GradientDrawable();
-            gd.setShape(GradientDrawable.OVAL);
             if (i < ThemeManager.SKIN_COLORS.length) {
+                GradientDrawable gd = new GradientDrawable();
+                gd.setShape(GradientDrawable.OVAL);
                 gd.setColor(ThemeManager.SKIN_COLORS[i]);
+                if (i == cur) gd.setStroke(dp(3), 0xFFFFFFFF);
+                skinViews[i].setBackground(gd);
             } else {
-                // 自定义圆点：显示当前自定义色（未设置时灰色）
-                gd.setColor(ThemeManager.primaryColor(requireContext()));
+                // 自定义入口：彩色色环（不固定单色）
+                ColorRingDrawable ring = new ColorRingDrawable();
+                ring.setSelected(i == cur);
+                skinViews[i].setBackground(ring);
             }
-            if (i == cur) gd.setStroke(dp(3), 0xFFFFFFFF);
-            skinViews[i].setBackground(gd);
         }
     }
 

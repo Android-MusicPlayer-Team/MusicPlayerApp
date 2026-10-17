@@ -102,10 +102,8 @@ public class LibraryFragment extends Fragment {
         actionDel.setTextColor(primary);
         actionBack.setTextColor(primary);
 
-        // 右上角设置图标 → 打开设置页；图标跟随皮肤主色
-        android.widget.ImageButton settingsBtn = view.findViewById(R.id.library_settings_btn);
-        settingsBtn.setColorFilter(ThemeManager.primaryColor(requireContext()));
-        settingsBtn.setOnClickListener(v ->
+        // 右上角设置图标 → 打开设置页；颜色由 ic_settings 的 text_primary 资源随黑白自动切换
+        view.findViewById(R.id.library_settings_btn).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), SettingsActivity.class)));
 
         trackAdapter = new TrackAdapter(false, true);
