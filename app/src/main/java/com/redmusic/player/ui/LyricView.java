@@ -45,15 +45,13 @@ public class LyricView extends View {
 
     public LyricView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // 歌词随主题：夜间浅色、白天深色；当前行用皮肤主色
-        int primary = ThemeManager.primaryColor(context);
-        int text = ThemeManager.primaryTextColor(context);
-        activePaint.setColor(primary);
+        // 播放页固定深色背景：当前行白色加粗，其余白色，高亮背景淡白胶囊
+        activePaint.setColor(0xFFFFFFFF);
         activePaint.setFakeBoldText(true);
         activePaint.setTextAlign(Paint.Align.CENTER);
-        normalPaint.setColor(text);
+        normalPaint.setColor(0xFFFFFFFF);
         normalPaint.setTextAlign(Paint.Align.CENTER);
-        activeBack.setColor(ThemeManager.isDark(context) ? 0x22FFFFFF : 0x22000000);
+        activeBack.setColor(0x22FFFFFF);
         applySizes();
     }
 
@@ -155,7 +153,7 @@ public class LyricView extends View {
         super.onDraw(canvas);
         if (lines == null || lines.isEmpty()) {
             Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
-            p.setColor(ThemeManager.isDark(getContext()) ? 0x66FFFFFF : 0x66000000);
+            p.setColor(0x66FFFFFF);
             p.setTextSize(dp(14));
             p.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("暂无歌词", getWidth() / 2f, getHeight() / 2f, p);
@@ -223,7 +221,7 @@ public class LyricView extends View {
         // 拖动歌词时：顶部显示目标时间提示
         if (dragging) {
             Paint tip = new Paint(Paint.ANTI_ALIAS_FLAG);
-            tip.setColor(ThemeManager.primaryTextColor(getContext()));
+            tip.setColor(0xFFFFFFFF);
             tip.setTextSize(dp(13));
             tip.setTextAlign(Paint.Align.CENTER);
             String t = fmtTime(previewPositionMs);

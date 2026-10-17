@@ -15,10 +15,11 @@ import android.widget.Toast;
 
 import com.redmusic.player.model.Track;
 import com.redmusic.player.player.PlayerHolder;
+import com.redmusic.player.util.ThemeManager;
 
 import java.util.List;
 
-/** 底部弹出的播放列表面板：显示当前队列，可切歌、可删除 */
+/** 底部弹出的播放列表面板：显示当前队列，可切歌、可删除（随白天/夜间主题） */
 public class PlaylistDialog extends Dialog {
 
     public PlaylistDialog(Context ctx) {
@@ -26,7 +27,9 @@ public class PlaylistDialog extends Dialog {
         Window w = getWindow();
         if (w != null) {
             w.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(0xEE000000));
+            boolean dark = ThemeManager.isDark(ctx);
+            w.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(
+                    dark ? 0xEE000000 : 0xEEF5F5F5));
         }
         build(ctx);
     }
@@ -35,6 +38,9 @@ public class PlaylistDialog extends Dialog {
         PlayerHolder ph = PlayerHolder.get();
         List<Track> queue = ph.getQueue();
         int curPos = ph.getQueuePosition();
+        boolean dark = ThemeManager.isDark(ctx);
+        int text = ThemeManager.primaryTextColor(ctx);
+        int sub = ThemeManager.secondaryTextColor(ctx);
 
         LinearLayout root = new LinearLayout(ctx);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -48,7 +54,7 @@ public class PlaylistDialog extends Dialog {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         TextView title = new TextView(ctx);
         title.setText("播放列表 (" + queue.size() + ")");
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(text);
         title.setTextSize(18);
         title.setTypeface(title.getTypeface(), Typeface.BOLD);
         LinearLayout.LayoutParams tl = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
@@ -56,7 +62,7 @@ public class PlaylistDialog extends Dialog {
         titleBar.addView(title);
         TextView closeX = new TextView(ctx);
         closeX.setText("✕");
-        closeX.setTextColor(0xFFFFFFFF);
+        closeX.setTextColor(text);
         closeX.setTextSize(22);
         closeX.setPadding(dp(ctx, 20), 0, dp(ctx, 4), 0);
         closeX.setOnClickListener(v -> dismiss());
@@ -74,7 +80,7 @@ public class PlaylistDialog extends Dialog {
         if (queue.isEmpty()) {
             TextView empty = new TextView(ctx);
             empty.setText("队列为空");
-            empty.setTextColor(0x88FFFFFF);
+            empty.setTextColor(sub);
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(0, dp(ctx, 60), 0, 0);
             list.addView(empty);
@@ -90,7 +96,7 @@ public class PlaylistDialog extends Dialog {
 
             TextView idx = new TextView(ctx);
             idx.setText(i == cur ? "♪" : String.valueOf(i + 1));
-            idx.setTextColor(i == cur ? 0xFFFFFFFF : 0x66FFFFFF);
+            idx.setTextColor(i == cur ? text : sub);
             idx.setTextSize(14);
             idx.setWidth(dp(ctx, 36));
             row.addView(idx);
@@ -101,14 +107,14 @@ public class PlaylistDialog extends Dialog {
             col.setLayoutParams(colLp);
             TextView name = new TextView(ctx);
             name.setText(t.displayTitle());
-            name.setTextColor(i == cur ? 0xFFFFFFFF : 0xDDFFFFFF);
+            name.setTextColor(text);
             name.setTextSize(15);
             name.setSingleLine(true);
             name.setEllipsize(android.text.TextUtils.TruncateAt.END);
             col.addView(name);
             TextView artist = new TextView(ctx);
             artist.setText(t.displayArtist());
-            artist.setTextColor(0x77FFFFFF);
+            artist.setTextColor(sub);
             artist.setTextSize(12);
             artist.setSingleLine(true);
             artist.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -117,7 +123,7 @@ public class PlaylistDialog extends Dialog {
 
             TextView del = new TextView(ctx);
             del.setText("✕");
-            del.setTextColor(0x88FFFFFF);
+            del.setTextColor(sub);
             del.setTextSize(16);
             del.setPadding(dp(ctx, 16), 0, dp(ctx, 8), 0);
             final int pos = i;

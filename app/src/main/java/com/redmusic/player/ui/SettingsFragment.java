@@ -42,14 +42,19 @@ public class SettingsFragment extends Fragment {
                 view.findViewById(R.id.skin_1),
                 view.findViewById(R.id.skin_2),
                 view.findViewById(R.id.skin_3),
-                view.findViewById(R.id.skin_4)
+                view.findViewById(R.id.skin_4),
+                view.findViewById(R.id.skin_5)
         };
         for (int i = 0; i < skinViews.length; i++) {
             final int idx = i;
             skinViews[i].setOnClickListener(v -> {
-                ThemeManager.setSkin(requireContext(), idx);
-                refreshSkinUi();
-                applyTheme();
+                if (idx < ThemeManager.SKIN_COLORS.length) {
+                    ThemeManager.setSkin(requireContext(), idx);
+                    refreshSkinUi();
+                    applyTheme();
+                } else {
+                    showCustomPicker();
+                }
             });
         }
 
@@ -81,10 +86,42 @@ public class SettingsFragment extends Fragment {
         for (int i = 0; i < skinViews.length; i++) {
             GradientDrawable gd = new GradientDrawable();
             gd.setShape(GradientDrawable.OVAL);
-            gd.setColor(ThemeManager.SKIN_COLORS[i]);
+            if (i < ThemeManager.SKIN_COLORS.length) {
+                gd.setColor(ThemeManager.SKIN_COLORS[i]);
+            } else {
+                // 自定义圆点：显示当前自定义色（未设置时灰色）
+                gd.setColor(ThemeManager.primaryColor(requireContext()));
+            }
             if (i == cur) gd.setStroke(dp(3), 0xFFFFFFFF);
             skinViews[i].setBackground(gd);
         }
+    }
+
+    /** 自定义主色：输入 6 位 hex 颜色（如 C20C0C） */
+    private void showCustomPicker() {
+        androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(requireContext());
+        b.setTitle("自定义主题色");
+        b.setMessage("输入 6 位十六进制颜色，例如：C20C0C（红）、1976D2（蓝）");
+        final android.widget.EditText et = new android.widget.EditText(requireContext());
+        et.setHint("C20C0C");
+        b.setView(et);
+        b.setPositiveButton("确定", (d, w) -> {
+            String hex = et.getText().toString().trim().replace("#", "");
+            try {
+                if (hex.length() == 6) {
+                    int color = android.graphics.Color.parseColor("#" + hex);
+                    ThemeManager.setCustomColor(requireContext(), color);
+                    refreshSkinUi();
+                    applyTheme();
+                } else {
+                    android.widget.Toast.makeText(requireContext(), "颜色格式不正确", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception ex) {
+                android.widget.Toast.makeText(requireContext(), "颜色格式不正确", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+        b.setNegativeButton("取消", null);
+        b.show();
     }
 
     private void refreshModeUi() {
