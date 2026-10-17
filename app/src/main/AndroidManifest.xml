@@ -50,6 +50,69 @@
             </intent-filter>
         </activity>
 
+        <!-- 换桌面图标用的可选入口（默认禁用；在设置里选择后启用对应 alias，
+             桌面会额外出现所选颜色的图标入口，点它同样打开 App） -->
+        <activity-alias
+            android:name=".LauncherRed"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherBlue"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_blue"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherGreen"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_green"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherPurple"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_purple"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias
+            android:name=".LauncherOrange"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_launcher_orange"
+            android:label="@string/app_name"
+            android:targetActivity=".ui.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
         <service
             android:name=".player.PlaybackService"
             android:exported="false"
