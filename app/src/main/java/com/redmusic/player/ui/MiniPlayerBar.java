@@ -56,8 +56,6 @@ public class MiniPlayerBar extends LinearLayout {
             cover.setImageResource(R.drawable.ic_music_note);
         }
         playBtn.setImageResource(ph.isPlaying() ? R.drawable.ic_pause : R.drawable.ic_play);
-        // 播放/列表图标跟随皮肤主色
-        playBtn.setColorFilter(ThemeManager.primaryColor(getContext()));
-        playlistBtn.setColorFilter(ThemeManager.primaryColor(getContext()));
+        // 图标随白天/夜间自动切换（ic_*.xml 的 text_primary），任何主题都清晰可见
     }
 }
