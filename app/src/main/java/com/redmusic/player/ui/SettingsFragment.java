@@ -25,15 +25,9 @@ public class SettingsFragment extends Fragment {
     private View[] iconViews;
     private TextView modeDay, modeNight;
 
-    /** 桌面图标入口：与 AndroidManifest 中 Launcher* alias 一一对应 */
+    /** 桌面图标入口：与 AndroidManifest 中 Launcher* alias 一一对应（红/蓝/绿/紫/橙） */
     private static final String[] ICON_ALIAS = {
-            ".LauncherRed", ".LauncherBlue", ".LauncherGreen", ".LauncherPurple", ".LauncherOrange",
-            ".LauncherPink", ".LauncherTeal", ".LauncherYellow", ".LauncherBrown", ".LauncherBlack", ".LauncherBlueGray"
-    };
-    /** 图标色块颜色（与 alias 顺序一致） */
-    private static final int[] ICON_COLORS = {
-            0xFFC20C0C, 0xFF1976D2, 0xFF2E7D32, 0xFF7B1FA2, 0xFFF57C00,
-            0xFFE91E63, 0xFF009688, 0xFFFFC107, 0xFF795548, 0xFF212121, 0xFF607D8B
+            ".LauncherRed", ".LauncherBlue", ".LauncherGreen", ".LauncherPurple", ".LauncherOrange"
     };
 
     @Nullable
@@ -87,13 +81,7 @@ public class SettingsFragment extends Fragment {
                 view.findViewById(R.id.icon_1),
                 view.findViewById(R.id.icon_2),
                 view.findViewById(R.id.icon_3),
-                view.findViewById(R.id.icon_4),
-                view.findViewById(R.id.icon_5),
-                view.findViewById(R.id.icon_6),
-                view.findViewById(R.id.icon_7),
-                view.findViewById(R.id.icon_8),
-                view.findViewById(R.id.icon_9),
-                view.findViewById(R.id.icon_10)
+                view.findViewById(R.id.icon_4)
         };
         for (int i = 0; i < iconViews.length; i++) {
             final int idx = i;
@@ -128,7 +116,7 @@ public class SettingsFragment extends Fragment {
         for (int i = 0; i < iconViews.length; i++) {
             GradientDrawable gd = new GradientDrawable();
             gd.setShape(GradientDrawable.OVAL);
-            gd.setColor(ICON_COLORS[i]);
+            gd.setColor(ThemeManager.SKIN_COLORS[i]);
             if (i == cur) gd.setStroke(dp(3), 0xFFFFFFFF);
             iconViews[i].setBackground(gd);
         }
