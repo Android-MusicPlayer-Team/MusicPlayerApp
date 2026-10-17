@@ -93,7 +93,7 @@ public class SettingsFragment extends Fragment {
                 Prefs.setInt("icon_idx", idx);
                 setLauncherIcon(idx);
                 refreshIconUi();
-                Toast.makeText(requireContext(), "图标已切换，重启手机后桌面显示", Toast.LENGTH_LONG).show();
+                Toast.makeText(requireContext(), "图标已切换，返回桌面后生效", Toast.LENGTH_SHORT).show();
                 // 自动返回桌面，方便查看新图标
                 Intent home = new Intent(Intent.ACTION_MAIN);
                 home.addCategory(Intent.CATEGORY_HOME);
