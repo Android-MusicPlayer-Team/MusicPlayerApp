@@ -41,8 +41,10 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <!-- 真身禁用：桌面图标由 Launcher* alias 提供（当前启用者显示），切换 alias 即图标变色 -->
         <activity
             android:name=".ui.MainActivity"
+            android:enabled="false"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,11 +52,10 @@
             </intent-filter>
         </activity>
 
-        <!-- 换桌面图标用的可选入口（默认禁用；在设置里选择后启用对应 alias，
-             桌面会额外出现所选颜色的图标入口，点它同样打开 App） -->
+        <!-- 换桌面图标：红色为默认入口，切换后启用对应 alias 并禁用其他 -->
         <activity-alias
             android:name=".LauncherRed"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true"
             android:icon="@drawable/ic_launcher"
             android:label="@string/app_name"
