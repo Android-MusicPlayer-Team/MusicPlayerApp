@@ -32,8 +32,12 @@ public class SpectrumView extends View {
 
     public SpectrumView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        // 波形颜色跟随主题主色（可见度优先：主色→主色半透明渐变）
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
         barPaint.setShader(new LinearGradient(0, 0, 0, dp(36),
-                0x80FFFFFF, 0x22FFFFFF, Shader.TileMode.CLAMP));
+                (pc & 0x00FFFFFF) | 0x99000000,
+                (pc & 0x00FFFFFF) | 0x33000000,
+                Shader.TileMode.CLAMP));
         levels = new float[48];
     }
 
