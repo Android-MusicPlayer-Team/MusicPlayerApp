@@ -57,6 +57,7 @@ public class PlayerHolder {
     private PlayerHolder(Context ctx) {
         appContext = ctx.getApplicationContext();
         player = new ExoPlayer.Builder(ctx).build();
+        player.setRepeatMode(Player.REPEAT_MODE_OFF);
         player.addListener(new Player.Listener() {
             @Override
             public void onPlaybackStateChanged(int state) {
@@ -92,6 +93,8 @@ public class PlayerHolder {
 
     private void onTrackEnded() {
         if (playMode == MODE_ONE) {
+            // 单曲循环由 ExoPlayer 原生 REPEAT_MODE_ONE 处理（不会走到这）
+            // 兜底：万一触发 ENDED，回到开头重播，避免跳走
             player.seekTo(0);
             player.play();
         } else {
@@ -117,6 +120,7 @@ public class PlayerHolder {
         } else {
             index = start;
         }
+        player.setRepeatMode(playMode == MODE_ONE ? Player.REPEAT_MODE_ONE : Player.REPEAT_MODE_OFF);
         loadCurrent();
         player.play();
         // 启动前台服务，后台/锁屏也能继续播放并有通知栏控制
@@ -294,6 +298,8 @@ public class PlayerHolder {
     public void cycleMode() {
         int curQueueIdx = actualIndex();  // 记住当前播放的歌在 queue 中的实际下标
         playMode = (playMode + 1) % 3;
+        // 单曲循环用 ExoPlayer 原生循环，避免手动 seekTo 长时间循环卡死/误跳下一首
+        player.setRepeatMode(playMode == MODE_ONE ? Player.REPEAT_MODE_ONE : Player.REPEAT_MODE_OFF);
         if (playMode == MODE_SHUFFLE) {
             // 切到随机：重建随机队列，把当前歌放到最前面
             buildShuffleOrder();
