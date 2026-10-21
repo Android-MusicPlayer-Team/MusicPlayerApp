@@ -97,6 +97,13 @@ public class Prefs {
         sp.edit().remove("history").apply();
     }
 
+    /** 删除单条搜索历史 */
+    public static void removeHistory(String q) {
+        Set<String> set = new LinkedHashSet<>(sp.getStringSet("history", new LinkedHashSet<String>()));
+        set.remove(q);
+        sp.edit().putStringSet("history", set).apply();
+    }
+
     // ================= 我导入的音乐 =================
 
     /** 保存导入的本地歌曲列表（扫描指定目录得到） */

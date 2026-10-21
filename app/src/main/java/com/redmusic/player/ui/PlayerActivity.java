@@ -309,7 +309,7 @@ public class PlayerActivity extends AppCompatActivity {
         Track t = ph.currentTrack();
         if (t == null) {
             cover.setImageResource(R.drawable.ic_music_note);
-            title.setText("朜撔");
+            title.setText("未在播放");
             artist.setText("");
             lyricLine.setText("");
             return;

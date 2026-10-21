@@ -33,11 +33,16 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         /** 长按歌曲（默认空实现，不强制各界面实现） */
         default void onLongPress(Track t) {
         }
+
+        /** 点行内"删除"按钮（默认空实现） */
+        default void onRemove(Track t) {
+        }
     }
 
     private final List<Track> tracks = new ArrayList<>();
     private final boolean rankMode;
     private final boolean favMode;
+    private boolean removeMode = false;
     private OnAction action;
 
     public TrackAdapter(boolean rankMode, boolean favMode) {
@@ -47,6 +52,11 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
 
     public void setAction(OnAction action) {
         this.action = action;
+    }
+
+    /** 是否显示行内"删除"按钮（歌单详情用） */
+    public void setRemoveMode(boolean b) {
+        removeMode = b;
     }
 
     public void setTracks(List<Track> list) {
@@ -112,6 +122,16 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         h.fav.setOnClickListener(v -> {
             if (action != null) action.onFav(t);
         });
+        if (removeMode) {
+            h.remove.setVisibility(View.VISIBLE);
+            h.remove.setTextColor(ThemeManager.primaryColor(h.remove.getContext()));
+            h.remove.setTag(position);
+            h.remove.setOnClickListener(v -> {
+                if (action != null) action.onRemove(t);
+            });
+        } else {
+            h.remove.setVisibility(View.GONE);
+        }
     }
 
     private static int dp(Context ctx, float v) {
@@ -127,6 +147,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
         ImageView cover;
         TextView title, artist, rank;
         ImageButton fav;
+        TextView remove;
 
         VH(@NonNull View itemView) {
             super(itemView);
@@ -135,6 +156,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.VH> {
             artist = itemView.findViewById(R.id.item_artist);
             rank = itemView.findViewById(R.id.item_rank);
             fav = itemView.findViewById(R.id.item_fav);
+            remove = itemView.findViewById(R.id.item_remove);
         }
     }
 }

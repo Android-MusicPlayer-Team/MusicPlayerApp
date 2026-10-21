@@ -182,7 +182,9 @@ public class PlayerHolder {
     private void startPlay(Track t) {
         String url = t.previewUrl;
         if (url == null || url.isEmpty()) {
-            url = "https://audio-ssl.itunes.apple.com/itunes-assets/placeholder.m4a";
+            // 在线歌未取到真实播放地址：不播占位，直接跳过，避免误判"整单无网络"
+            next(false);
+            return;
         }
         player.setMediaItem(MediaItem.fromUri(url));
         player.prepare();
@@ -332,7 +334,7 @@ public class PlayerHolder {
             player.play();
             return;
         }
-        if (queue.size() > 0 && consecutiveFailures >= queue.size()) {
+        if (queue.size() > 0 && consecutiveFailures >= Math.max(3, queue.size())) {
             // 整单都放不了（多半无网络）→ 停止并标记
             allFailed = true;
             index = -1;

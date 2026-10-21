@@ -133,6 +133,14 @@ public class LibraryFragment extends Fragment {
                     showRemoveFromOpenPlaylist(t);           // 歌单详情长按 → 移除
                 }
             }
+
+            @Override
+            public void onRemove(Track t) {
+                // 歌单详情行内"删除"按钮 → 移除
+                if (currentTab == TAB_PLAYLISTS && inPlaylistDetail) {
+                    showRemoveFromOpenPlaylist(t);
+                }
+            }
         });
 
         playlistAdapter = new PlaylistListAdapter();
@@ -217,6 +225,8 @@ public class LibraryFragment extends Fragment {
     /** 用歌曲列表填充列表（收藏/最近/导入/歌单详情共用） */
     private void bindTracks(List<Track> tracks, String emptyText) {
         list.setAdapter(trackAdapter);
+        // 仅歌单详情显示行内"删除"按钮
+        trackAdapter.setRemoveMode(currentTab == TAB_PLAYLISTS && inPlaylistDetail);
         trackAdapter.setTracks(tracks);
         emptyTip.setVisibility(tracks.isEmpty() ? View.VISIBLE : View.GONE);
         emptyTip.setText(tracks.isEmpty() ? emptyText : "");
@@ -353,7 +363,7 @@ public class LibraryFragment extends Fragment {
                 Track t = new Track();
                 t.id = Uri.fromFile(f).toString();
                 t.previewUrl = Uri.fromFile(f).toString();
-                t.title = stripExt(f.getName());
+                t.title = readLocalTitle(f);
                 t.artist = "本地音乐";
                 // 同目录同名 .lrc 歌词文件（大小写都认）
                 String base = f.getName().substring(0, f.getName().lastIndexOf('.'));
@@ -381,6 +391,23 @@ public class LibraryFragment extends Fragment {
         return i > 0 ? name.substring(0, i) : name;
     }
 
+    /** 本地文件优先读音频自带标题，避免乱码文件名；读不到再回退文件名 */
+    private String readLocalTitle(File f) {
+        String fallback = stripExt(f.getName());
+        try {
+            android.media.MediaMetadataRetriever mmr = new android.media.MediaMetadataRetriever();
+            mmr.setDataSource(f.getAbsolutePath());
+            String meta = mmr.extractMetadata(
+                    android.media.MediaMetadataRetriever.METADATA_KEY_TITLE);
+            mmr.release();
+            if (meta != null && !meta.trim().isEmpty()) {
+                return meta.trim();
+            }
+        } catch (Exception ignored) {
+        }
+        return fallback;
+    }
+
     private int dp(int v) {
         return (int) (v * getResources().getDisplayMetrics().density + 0.5f);
     }
@@ -390,6 +417,14 @@ public class LibraryFragment extends Fragment {
     private void showCreatePlaylist() {
         EditText et = new EditText(getContext());
         et.setHint("歌单名称");
+        et.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                com.redmusic.player.util.ThemeManager.primaryColor(getContext())));
+        android.graphics.drawable.ShapeDrawable caret = new android.graphics.drawable.ShapeDrawable();
+        caret.setIntrinsicWidth(dp(2));
+        caret.getPaint().setColor(com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            et.setTextCursorDrawable(caret);
+        }
         final AlertDialog d = new AlertDialog.Builder(getContext())
                 .setTitle("新建歌单")
                 .setView(et)
@@ -434,7 +469,7 @@ public class LibraryFragment extends Fragment {
 
     /** 歌单详情里点"添加歌曲"：可选本地导入 / 在线歌曲库 */
     private void showAddSongsToOpen() {
-        new AlertDialog.Builder(getContext())
+        final AlertDialog dlg = new AlertDialog.Builder(getContext())
                 .setTitle("添加歌曲到歌单")
                 .setItems(new String[]{"从本地导入添加", "从在线歌曲库添加"}, (d, w) -> {
                     if (w == 0) {
@@ -444,7 +479,10 @@ public class LibraryFragment extends Fragment {
                     }
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        dlg.show();
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     /** 从本地导入列表多选添加 */
@@ -459,7 +497,7 @@ public class LibraryFragment extends Fragment {
         for (int i = 0; i < imported.size(); i++) {
             names[i] = imported.get(i).displayTitle() + " - " + imported.get(i).displayArtist();
         }
-        new AlertDialog.Builder(getContext())
+        final AlertDialog dlg = new AlertDialog.Builder(getContext())
                 .setTitle("选择要加入歌单的歌曲")
                 .setMultiChoiceItems(names, checked, (d, w, is) -> checked[w] = is)
                 .setPositiveButton("添加", (d, w) -> {
@@ -474,7 +512,11 @@ public class LibraryFragment extends Fragment {
                     refresh();
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        dlg.show();
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     /** 从在线歌曲库搜索添加（输入即自动搜索） */
@@ -488,6 +530,15 @@ public class LibraryFragment extends Fragment {
         input.setHint("输入歌名 / 歌手，自动搜索");
         input.setSingleLine(true);
         input.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        input.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                com.redmusic.player.util.ThemeManager.primaryColor(getContext())));
+        android.graphics.drawable.ShapeDrawable caret =
+                new android.graphics.drawable.ShapeDrawable();
+        caret.setIntrinsicWidth(dp(2));
+        caret.getPaint().setColor(com.redmusic.player.util.ThemeManager.primaryColor(getContext()));
+        if (android.os.Build.VERSION.SDK_INT >= 29) {
+            input.setTextCursorDrawable(caret);
+        }
         Button go = new Button(getContext());
         go.setText("搜索");
         searchRow.addView(input, new LinearLayout.LayoutParams(0,
@@ -561,6 +612,9 @@ public class LibraryFragment extends Fragment {
         });
         input.requestFocus();
         dlg.show();
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     /** 在线搜索并填充结果列表 */
@@ -597,7 +651,7 @@ public class LibraryFragment extends Fragment {
 
     /** 歌单详情长按歌曲 → 从歌单移除 */
     private void showRemoveFromOpenPlaylist(Track t) {
-        new AlertDialog.Builder(getContext())
+        final AlertDialog dlg = new AlertDialog.Builder(getContext())
                 .setTitle("从歌单移除")
                 .setMessage("确定把《" + t.displayTitle() + "》从歌单移除？")
                 .setPositiveButton("移除", (d, w) -> {
@@ -612,13 +666,17 @@ public class LibraryFragment extends Fragment {
                     refresh();
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        dlg.show();
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 
     private void deleteOpenPlaylist() {
         Playlist p = findPlaylist(openPlaylistId);
         if (p == null) return;
-        new AlertDialog.Builder(getContext())
+        final AlertDialog dlg = new AlertDialog.Builder(getContext())
                 .setTitle("删除歌单")
                 .setMessage("确定删除歌单《" + p.name + "》？")
                 .setPositiveButton("删除", (d, w) -> {
@@ -631,6 +689,10 @@ public class LibraryFragment extends Fragment {
                     backToPlaylists();
                 })
                 .setNegativeButton("取消", null)
-                .show();
+                .create();
+        dlg.show();
+        int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+        dlg.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+        dlg.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
     }
 }

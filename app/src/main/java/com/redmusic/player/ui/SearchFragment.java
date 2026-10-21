@@ -60,6 +60,12 @@ public class SearchFragment extends Fragment {
         });
         historyWrap = view.findViewById(R.id.history_wrap);
         emptyTip = view.findViewById(R.id.search_empty);
+        // 清空搜索历史
+        view.findViewById(R.id.history_clear).setOnClickListener(v -> {
+            Prefs.clearHistory();
+            renderHistory();
+            Toast.makeText(getContext(), "搜索历史已清空", Toast.LENGTH_SHORT).show();
+        });
 
         adapter = new TrackAdapter(false, false);
         adapter.setAction(new TrackAdapter.OnAction() {
@@ -214,6 +220,24 @@ public class SearchFragment extends Fragment {
                 input.setText(q);
                 input.setSelection(q.length());
                 doSearch();
+            });
+            // 长按单条历史 → 弹确认框 → 确定后删除该条
+            chip.setOnLongClickListener(v -> {
+                final android.app.AlertDialog dlg = new android.app.AlertDialog.Builder(getContext())
+                        .setTitle("删除搜索记录")
+                        .setMessage("确定删除该条搜索记录？")
+                        .setPositiveButton("删除", (d, w) -> {
+                            Prefs.removeHistory(q);
+                            renderHistory();
+                            Toast.makeText(getContext(), "已删除该条记录", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("取消", null)
+                        .create();
+                dlg.show();
+                int pc = com.redmusic.player.util.ThemeManager.primaryColor(getContext());
+                dlg.getButton(android.app.AlertDialog.BUTTON_POSITIVE).setTextColor(pc);
+                dlg.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setTextColor(pc);
+                return true;
             });
             historyWrap.addView(chip);
         }
