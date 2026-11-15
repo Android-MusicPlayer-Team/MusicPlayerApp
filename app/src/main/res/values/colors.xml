@@ -2,6 +2,8 @@
 <resources>
     <color name="red">#C20C0C</color>
     <color name="red_light">#FF6B6B</color>
+    <!-- 主题兜底色：未单独上色的系统控件统一取中性色，强调色由代码按皮肤主色设置 -->
+    <color name="accent_neutral">#8A8A8A</color>
     <!-- 白天模式配色 -->
     <color name="bg">#F5F5F5</color>
     <color name="bg_card">#FFFFFF</color>

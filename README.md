@@ -1,4 +1,4 @@
-# 红云音乐 RedMusic
+# AveMusica 音乐播放器
 
 一款参考网易云音乐交互标准开发的安卓音乐播放器，自动联网拉取公开音乐源，支持封面、歌词、频谱动效、收藏与搜索。
 
@@ -39,7 +39,7 @@ gradle assembleRelease
 ## 项目结构
 
 ```
-app/src/main/java/com/redmusic/player/
+app/src/main/java/com/avemusica/player/
 ├── api/          # 网络接口（ApiClient、MusicApi）
 ├── model/        # 数据模型（Track、LyricLine）
 ├── player/       # 播放核心（PlayerHolder）

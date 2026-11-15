@@ -10,7 +10,7 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <com.redmusic.player.ui.MiniPlayerBar
+    <com.avemusica.player.ui.MiniPlayerBar
         android:id="@+id/mini_bar"
         android:layout_width="match_parent"
         android:layout_height="60dp"

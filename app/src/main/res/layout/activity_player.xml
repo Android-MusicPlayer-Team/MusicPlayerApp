@@ -103,7 +103,7 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <com.redmusic.player.ui.LyricView
+            <com.avemusica.player.ui.LyricView
                 android:id="@+id/player_lyric_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -146,7 +146,7 @@
                         android:src="@drawable/ic_tonearm" />
                 </FrameLayout>
 
-                <com.redmusic.player.ui.SpectrumView
+                <com.avemusica.player.ui.SpectrumView
                     android:id="@+id/player_spectrum"
                     android:layout_width="match_parent"
                     android:layout_height="36dp"

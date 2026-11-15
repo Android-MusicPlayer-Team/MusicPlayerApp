@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.RedMusic" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/red</item>
-        <item name="colorPrimaryDark">#8A0808</item>
-        <item name="colorAccent">@color/red_light</item>
+    <style name="Theme.AveMusica" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/accent_neutral</item>
+        <item name="colorPrimaryDark">@color/accent_neutral</item>
+        <item name="colorAccent">@color/accent_neutral</item>
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:statusBarColor">@color/bg</item>
         <item name="android:navigationBarColor">@color/bg</item>
